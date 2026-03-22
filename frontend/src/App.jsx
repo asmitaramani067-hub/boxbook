@@ -31,7 +31,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <div className="min-h-screen bg-dark-900 text-white">
+        <div className="min-h-screen bg-dark-900 text-white relative">
           <Navbar />
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>

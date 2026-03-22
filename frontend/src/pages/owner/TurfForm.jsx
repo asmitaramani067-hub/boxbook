@@ -15,6 +15,15 @@ const DEFAULT_SLOTS = [
 
 const AMENITIES_LIST = ['Floodlights', 'Parking', 'Changing Room', 'Drinking Water', 'Washroom', 'Cafeteria', 'First Aid', 'Equipment Rental'];
 
+const Section = ({ title, children }) => (
+  <motion.div variants={fadeUp}
+    className="rounded-2xl p-6 space-y-4"
+    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
+    <h2 className="font-bold text-base text-white">{title}</h2>
+    {children}
+  </motion.div>
+);
+
 export default function TurfForm() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -30,9 +39,7 @@ export default function TurfForm() {
   const [loading, setLoading] = useState(false);
   const [customSlot, setCustomSlot] = useState('');
 
-  useEffect(() => {
-    if (isEdit) fetchTurf();
-  }, [id]);
+  useEffect(() => { if (isEdit) fetchTurf(); }, [id]);
 
   const fetchTurf = async () => {
     try {
@@ -105,96 +112,101 @@ export default function TurfForm() {
   };
 
   return (
-    <div className="min-h-screen pt-20 pb-10 px-4">
+    <div className="min-h-screen pt-20 pb-16 px-4 bg-dark-900">
       <div className="max-w-3xl mx-auto">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors">
+        <button onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-white mb-6 transition-colors text-sm">
           <FiArrowLeft /> Back
         </button>
 
-        <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <h1 className="text-3xl font-black">{isEdit ? 'Edit Turf' : 'Add New Turf'}</h1>
-          <p className="text-gray-400 mt-1">{isEdit ? 'Update your turf details' : 'List your turf on BoxBook'}</p>
+        <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+          <p className="text-neon text-xs font-semibold tracking-widest uppercase mb-2">
+            {isEdit ? 'Edit' : 'New'}
+          </p>
+          <h1 className="text-3xl font-black text-white">{isEdit ? 'Edit Turf' : 'Add New Turf'}</h1>
+          <p className="text-gray-500 mt-1 text-sm">{isEdit ? 'Update your turf details' : 'List your turf on BoxBook'}</p>
         </motion.div>
 
         <motion.form initial="hidden" animate="visible" variants={staggerContainer}
-          onSubmit={handleSubmit} className="space-y-6">
+          onSubmit={handleSubmit} className="space-y-5">
 
-          {/* Basic Info */}
-          <motion.div variants={fadeUp} className="glass rounded-2xl p-6 space-y-4">
-            <h2 className="font-bold text-lg">Basic Information</h2>
+          <Section title="Basic Information">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-gray-400 mb-1.5 block">Turf Name *</label>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Turf Name *</label>
                 <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="e.g. Green Arena Box Cricket" className="input-field" />
+                  placeholder="e.g. Green Arena Box Cricket" className="input-field text-sm" />
               </div>
               <div>
-                <label className="text-sm text-gray-400 mb-1.5 block">City *</label>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">City *</label>
                 <select required value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                  className="input-field appearance-none cursor-pointer">
-                  <option value="" className="bg-dark-700">-- Select City --</option>
-                  {CITIES.map(c => <option key={c} value={c} className="bg-dark-700">{c}</option>)}
+                  className="input-field appearance-none cursor-pointer text-sm">
+                  <option value="" style={{ background: '#111318' }}>-- Select City --</option>
+                  {CITIES.map(c => <option key={c} value={c} style={{ background: '#111318' }}>{c}</option>)}
                 </select>
               </div>
             </div>
             <div>
-              <label className="text-sm text-gray-400 mb-1.5 block">Full Address *</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Full Address *</label>
               <input required value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
-                placeholder="Street, Area, City" className="input-field" />
+                placeholder="Street, Area, City" className="input-field text-sm" />
             </div>
             <div>
-              <label className="text-sm text-gray-400 mb-1.5 block">Description</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Description</label>
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
-                placeholder="Describe your turf..." rows={3} className="input-field resize-none" />
+                placeholder="Describe your turf..." rows={3} className="input-field resize-none text-sm" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm text-gray-400 mb-1.5 block">Price per Hour (₹) *</label>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Price per Hour (&#8377;) *</label>
                 <input type="number" required min="1" value={form.pricePerHour}
                   onChange={e => setForm(f => ({ ...f, pricePerHour: e.target.value }))}
-                  placeholder="e.g. 800" className="input-field" />
+                  placeholder="e.g. 800" className="input-field text-sm" />
               </div>
               <div>
-                <label className="text-sm text-gray-400 mb-1.5 block">Contact Number *</label>
+                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Contact Number *</label>
                 <input required value={form.contactNumber} onChange={e => setForm(f => ({ ...f, contactNumber: e.target.value }))}
-                  placeholder="+91 98765 43210" className="input-field" />
+                  placeholder="+91 98765 43210" className="input-field text-sm" />
               </div>
             </div>
             <div>
-              <label className="text-sm text-gray-400 mb-1.5 block">Google Maps Link</label>
+              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Google Maps Link</label>
               <input value={form.mapLink} onChange={e => setForm(f => ({ ...f, mapLink: e.target.value }))}
-                placeholder="https://maps.google.com/..." className="input-field" />
+                placeholder="https://maps.google.com/..." className="input-field text-sm" />
             </div>
-          </motion.div>
+          </Section>
 
-          {/* Images */}
-          <motion.div variants={fadeUp} className="glass rounded-2xl p-6 space-y-4">
-            <h2 className="font-bold text-lg">Turf Images</h2>
-            <label className="flex flex-col items-center justify-center h-32 border-2 border-dashed border-white/20 rounded-xl cursor-pointer hover:border-neon/50 transition-colors">
-              <FiUpload className="text-2xl text-gray-400 mb-2" />
-              <span className="text-sm text-gray-400">Click to upload images (max 5)</span>
+          <Section title="Turf Images">
+            <label className="flex flex-col items-center justify-center h-32 rounded-xl cursor-pointer transition-all duration-200"
+              style={{ border: '2px dashed rgba(255,255,255,0.12)' }}
+              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(57,255,20,0.4)'}
+              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'}>
+              <FiUpload className="text-2xl text-gray-500 mb-2" />
+              <span className="text-sm text-gray-500">Click to upload images (max 5)</span>
               <input type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
             </label>
             {previews.length > 0 && (
               <div className="flex gap-3 flex-wrap">
                 {previews.map((p, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden">
+                  <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden"
+                    style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
                     <img src={p.startsWith('/') ? `http://localhost:5000${p}` : p} alt="" className="w-full h-full object-cover" />
                   </div>
                 ))}
               </div>
             )}
-          </motion.div>
+          </Section>
 
-          {/* Time Slots */}
-          <motion.div variants={fadeUp} className="glass rounded-2xl p-6 space-y-4">
-            <h2 className="font-bold text-lg">Available Time Slots</h2>
+          <Section title="Available Time Slots">
             <div className="flex flex-wrap gap-2">
               {DEFAULT_SLOTS.map(slot => (
                 <button key={slot} type="button" onClick={() => toggleSlot(slot)}
-                  className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all ${
-                    form.timeSlots.includes(slot) ? 'bg-neon text-black' : 'glass hover:border-neon/50'
-                  }`}>
+                  className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200"
+                  style={{
+                    background: form.timeSlots.includes(slot) ? '#39FF14' : 'rgba(255,255,255,0.04)',
+                    border: form.timeSlots.includes(slot) ? '1px solid #39FF14' : '1px solid rgba(255,255,255,0.08)',
+                    color: form.timeSlots.includes(slot) ? '#000' : '#9ca3af',
+                  }}>
                   {slot}
                 </button>
               ))}
@@ -209,35 +221,40 @@ export default function TurfForm() {
             {form.timeSlots.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {form.timeSlots.map(s => (
-                  <span key={s} className="flex items-center gap-1 bg-neon/10 text-neon text-xs px-3 py-1 rounded-full border border-neon/20">
+                  <span key={s} className="flex items-center gap-1.5 text-xs text-neon px-3 py-1 rounded-full"
+                    style={{ background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)' }}>
                     {s}
-                    <button type="button" onClick={() => toggleSlot(s)}><FiX className="text-xs" /></button>
+                    <button type="button" onClick={() => toggleSlot(s)} className="hover:text-white transition-colors">
+                      <FiX className="text-xs" />
+                    </button>
                   </span>
                 ))}
               </div>
             )}
-          </motion.div>
+          </Section>
 
-          {/* Amenities */}
-          <motion.div variants={fadeUp} className="glass rounded-2xl p-6 space-y-4">
-            <h2 className="font-bold text-lg">Amenities</h2>
+          <Section title="Amenities">
             <div className="flex flex-wrap gap-2">
               {AMENITIES_LIST.map(a => (
                 <button key={a} type="button" onClick={() => toggleAmenity(a)}
-                  className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-all ${
-                    form.amenities.includes(a) ? 'bg-neon text-black' : 'glass hover:border-neon/50'
-                  }`}>
+                  className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200"
+                  style={{
+                    background: form.amenities.includes(a) ? '#39FF14' : 'rgba(255,255,255,0.04)',
+                    border: form.amenities.includes(a) ? '1px solid #39FF14' : '1px solid rgba(255,255,255,0.08)',
+                    color: form.amenities.includes(a) ? '#000' : '#9ca3af',
+                  }}>
                   {a}
                 </button>
               ))}
             </div>
-          </motion.div>
+          </Section>
 
           <motion.button variants={fadeUp} type="submit" disabled={loading}
             whileTap={{ scale: 0.97 }}
-            className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg disabled:opacity-60">
-            {loading ? <span className="w-6 h-6 border-2 border-black/30 border-t-black rounded-full animate-spin" /> :
-              isEdit ? 'Update Turf' : 'Add Turf'}
+            className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-base disabled:opacity-60">
+            {loading
+              ? <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+              : isEdit ? 'Update Turf' : 'Add Turf'}
           </motion.button>
         </motion.form>
       </div>
