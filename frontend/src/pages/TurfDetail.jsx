@@ -14,6 +14,9 @@ const PLACEHOLDER = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97
 
 // ── Booking success modal ──────────────────────────────────────────────────
 function BookingSuccessModal({ booking, onClose }) {
+  const slots = booking.slots || [booking];
+  const totalPaid = slots.reduce((s, b) => s + (b.totalPrice || 0), 0);
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -32,7 +35,11 @@ function BookingSuccessModal({ booking, onClose }) {
           <FiCheck className="text-pitch-700 text-4xl" />
         </div>
         <h2 className="text-2xl font-black text-ink-900 mb-1">Booking Confirmed!</h2>
-        <p className="text-ink-500 text-sm mb-6">Your slot has been reserved successfully.</p>
+        <p className="text-ink-500 text-sm mb-6">
+          {slots.length > 1
+            ? `${slots.length} slots reserved successfully.`
+            : 'Your slot has been reserved successfully.'}
+        </p>
 
         {/* Booking details */}
         <div className="bg-pitch-50 border border-pitch-200 rounded-xl p-4 space-y-3 text-sm text-left mb-6">
@@ -40,17 +47,41 @@ function BookingSuccessModal({ booking, onClose }) {
             <span className="text-ink-500 flex items-center gap-1.5"><FiCalendar className="text-pitch-600 text-xs" /> Date</span>
             <span className="font-bold text-ink-900">{booking.date}</span>
           </div>
-          <div className="flex items-center justify-between">
-            <span className="text-ink-500 flex items-center gap-1.5"><FiClock className="text-pitch-600 text-xs" /> Slot</span>
-            <span className="font-bold text-ink-900">{booking.timeSlot}</span>
-          </div>
-          <div className="flex items-center justify-between">
-            <span className="text-ink-500 flex items-center gap-1.5"><FiBox className="text-pitch-600 text-xs" /> Box Assigned</span>
-            <span className="font-bold text-pitch-700 text-base">{booking.box?.name || 'Box 1'}</span>
-          </div>
+
+          {/* Single slot */}
+          {slots.length === 1 && (
+            <>
+              <div className="flex items-center justify-between">
+                <span className="text-ink-500 flex items-center gap-1.5"><FiClock className="text-pitch-600 text-xs" /> Slot</span>
+                <span className="font-bold text-ink-900">{booking.timeSlot}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-ink-500 flex items-center gap-1.5"><FiBox className="text-pitch-600 text-xs" /> Box</span>
+                <span className="font-bold text-pitch-700">{booking.box?.name || 'Box 1'}</span>
+              </div>
+            </>
+          )}
+
+          {/* Multiple slots */}
+          {slots.length > 1 && (
+            <div className="space-y-2">
+              <span className="text-ink-500 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider">
+                <FiClock className="text-pitch-600 text-xs" /> Booked Slots
+              </span>
+              {slots.map((s, i) => (
+                <div key={i} className="flex items-center justify-between pl-2 border-l-2 border-pitch-300">
+                  <span className="font-semibold text-ink-900">{s.timeSlot}</span>
+                  <span className="text-xs font-bold text-pitch-700 flex items-center gap-1">
+                    <FiBox className="text-xs" /> {s.box?.name || 'Box 1'}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+
           <div className="flex items-center justify-between border-t border-pitch-200 pt-3">
-            <span className="text-ink-500">Amount</span>
-            <span className="font-black text-pitch-700 text-lg">&#8377;{booking.totalPrice}</span>
+            <span className="text-ink-500">Total Paid</span>
+            <span className="font-black text-pitch-700 text-lg">&#8377;{totalPaid}</span>
           </div>
         </div>
 
@@ -84,7 +115,7 @@ export default function TurfDetail() {
   const [allSlots, setAllSlots] = useState([]);    // unique slots across all boxes
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [selectedSlot, setSelectedSlot] = useState('');
+  const [selectedSlots, setSelectedSlots] = useState([]); // multi-select
   const [availability, setAvailability] = useState({}); // slot -> { total, booked, available }
   const [booking, setBooking] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState(null); // show modal
@@ -95,7 +126,6 @@ export default function TurfDetail() {
   useEffect(() => { fetchTurf(); }, [id]);
   useEffect(() => { if (turf) { fetchBoxes(); } }, [turf]);
   useEffect(() => { if (boxes.length) fetchAvailability(); }, [selectedDate, boxes]);
-
   const fetchTurf = async () => {
     try {
       const { data } = await api.get(`/turfs/${id}`);
@@ -134,17 +164,28 @@ export default function TurfDetail() {
     }
   };
 
+  const toggleSlot = (slot) => {
+    setSelectedSlots(prev =>
+      prev.includes(slot) ? prev.filter(s => s !== slot) : [...prev, slot]
+    );
+  };
+
   const handleBook = async () => {
     if (!user) return navigate('/login');
-    if (!selectedSlot) return toast.error('Please select a time slot');
+    if (!selectedSlots.length) return toast.error('Please select at least one time slot');
     setBooking(true);
     try {
       const dateStr = selectedDate.toISOString().split('T')[0];
-      const { data } = await api.post('/bookings', { turfId: id, date: dateStr, timeSlot: selectedSlot });
-      // Show success modal with box info
-      setConfirmedBooking(data);
-      setSelectedSlot('');
-      fetchAvailability(); // refresh slot availability
+      // Book each slot sequentially — each gets its own box assignment
+      const results = [];
+      for (const slot of selectedSlots) {
+        const { data } = await api.post('/bookings', { turfId: id, date: dateStr, timeSlot: slot });
+        results.push(data);
+      }
+      // Show modal with summary of all booked slots
+      setConfirmedBooking({ ...results[0], slots: results });
+      setSelectedSlots([]);
+      fetchAvailability();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Booking failed');
     } finally {
@@ -357,16 +398,17 @@ export default function TurfDetail() {
 
                 <div>
                   <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Select Date</label>
-                  <DatePicker selected={selectedDate} onChange={(d) => { setSelectedDate(d); setSelectedSlot(''); }}
+                  <DatePicker selected={selectedDate} onChange={(d) => { setSelectedDate(d); setSelectedSlots([]); }}
                     minDate={new Date()} dateFormat="dd/MM/yyyy"
                     className="input-field w-full cursor-pointer text-sm"
                     wrapperClassName="w-full" />
                 </div>
 
                 <div>
-                  <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                    <FiClock className="text-pitch-600 text-xs" /> Available Slots
+                  <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-1 flex items-center gap-1.5">
+                    <FiClock className="text-pitch-600 text-xs" /> Select Slots
                   </label>
+                  <p className="text-xs text-ink-400 mb-2">Tap multiple slots to book 2–3 hours</p>
 
                   {allSlots.length === 0 ? (
                     <p className="text-ink-400 text-sm italic">No slots available. Add boxes with time slots first.</p>
@@ -377,10 +419,10 @@ export default function TurfDetail() {
                         const avail = info ? info.available : 0;
                         const total = info ? info.total : 0;
                         const isFullyBooked = avail === 0 && total > 0;
-                        const isSelected = selectedSlot === slot;
+                        const isSelected = selectedSlots.includes(slot);
 
                         return (
-                          <button key={slot} disabled={isFullyBooked} onClick={() => setSelectedSlot(slot)}
+                          <button key={slot} disabled={isFullyBooked} onClick={() => toggleSlot(slot)}
                             className="py-2.5 px-3 rounded-xl text-xs font-medium transition-all duration-200 text-left"
                             style={{
                               background: isFullyBooked ? '#FEF2F2' : isSelected ? '#2E7D32' : '#F9FAFB',
@@ -394,7 +436,7 @@ export default function TurfDetail() {
                             <div style={{ fontSize: '10px', marginTop: '2px', opacity: 0.8 }}>
                               {isFullyBooked
                                 ? '🔴 All boxes full'
-                                : `🟢 ${avail} of ${total} box${total !== 1 ? 'es' : ''} available`}
+                                : `🟢 ${avail} of ${total} box${total !== 1 ? 'es' : ''} free`}
                             </div>
                           </button>
                         );
@@ -404,34 +446,37 @@ export default function TurfDetail() {
                 </div>
 
                 {/* Summary */}
-                {selectedSlot && (
+                {selectedSlots.length > 0 && (
                   <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
                     className="rounded-xl p-4 space-y-2.5 text-sm bg-pitch-50 border border-pitch-200">
                     <div className="flex justify-between text-ink-500">
                       <span>Date</span>
                       <span className="text-ink-900 font-semibold">{selectedDate.toLocaleDateString('en-IN')}</span>
                     </div>
-                    <div className="flex justify-between text-ink-500">
-                      <span>Slot</span>
-                      <span className="text-ink-900 font-semibold">{selectedSlot}</span>
-                    </div>
-                    <div className="flex justify-between text-ink-500">
-                      <span>Box</span>
-                      <span className="text-pitch-700 font-semibold text-xs">Auto-assigned on confirm</span>
+                    <div className="space-y-1">
+                      <span className="text-ink-500 text-xs">Slots ({selectedSlots.length}h)</span>
+                      {selectedSlots.map(s => (
+                        <div key={s} className="flex justify-between pl-2 border-l-2 border-pitch-300">
+                          <span className="text-ink-700 font-medium">{s}</span>
+                          <span className="text-ink-500">&#8377;{turf.pricePerHour}</span>
+                        </div>
+                      ))}
                     </div>
                     <div className="flex justify-between font-bold pt-2 border-t border-pitch-200">
                       <span className="text-ink-900">Total</span>
-                      <span className="text-pitch-700 text-base">&#8377;{turf.pricePerHour}</span>
+                      <span className="text-pitch-700 text-base">&#8377;{turf.pricePerHour * selectedSlots.length}</span>
                     </div>
                   </motion.div>
                 )}
 
-                <motion.button onClick={handleBook} disabled={booking || !selectedSlot || boxes.length === 0}
+                <motion.button onClick={handleBook} disabled={booking || !selectedSlots.length || boxes.length === 0}
                   whileTap={{ scale: 0.97 }}
                   className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-pitch-700 to-pitch-600 text-white hover:from-pitch-800 hover:to-pitch-700 transition-all duration-200 shadow-lg shadow-pitch-700/25 disabled:opacity-40 disabled:cursor-not-allowed">
                   {booking
                     ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                    : '🏏 Confirm Booking'}
+                    : selectedSlots.length > 1
+                      ? `🏏 Book ${selectedSlots.length} Slots`
+                      : '🏏 Confirm Booking'}
                 </motion.button>
 
                 {!user && (
