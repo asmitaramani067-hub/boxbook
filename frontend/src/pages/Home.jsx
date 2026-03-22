@@ -11,9 +11,9 @@ export { CITIES };
 
 const PREVIEW_TURFS = EXPLORE_TURFS.slice(0, 3);
 const PREVIEW_IMGS = [
-  'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&q=80',
-  'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80',
-  'https://images.unsplash.com/photo-1624880357913-a8539238245b?w=600&q=80',
+  'https://lh3.googleusercontent.com/gps-cs-s/AHVAweqqlp3D822p-bsCb-pHWsYyBzGlpJKOVgTuYs6QVGwbifdkXYRFWCtvXqT9K2PkYfboRxVpUufwl2Ac6C1uTOdZd1d2PU8pBMkuCUt0E5vS98c2ZCjch0yNiApJ7vPLj1pbosfGwOmJwLie=s680-w680-h510-rw',
+  'https://lh3.googleusercontent.com/gps-cs-s/AHVAweojq9dVG9iIHItiyPNNk9M9kSFwJtHksIXQGn1LKhWpIy3RK1bxKL1KB1PUVEXeYoQNlw96hxZBpHk_y7GCr4ldYG1AQbWXdVT6ER_uYcoiqda8z50TgJjkMba-UOI1jsor7COYBw=w141-h235-n-k-no-nu',
+  'https://lh3.googleusercontent.com/p/AF1QipPcA45J2t8NeSviF6X3cCHzf797XxjefeBjSAmq=w243-h174-n-k-no-nu',
 ];
 
 import heroBg from '../assets/hero.jpg';

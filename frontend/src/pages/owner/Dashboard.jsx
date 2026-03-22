@@ -5,6 +5,7 @@ import { FiPlus, FiEdit2, FiTrash2, FiCalendar, FiUsers, FiMapPin, FiTrendingUp 
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { staggerContainer, fadeUp } from '../../animations/variants';
+import BoxManager from './BoxManager';
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&q=80';
 
@@ -130,7 +131,7 @@ export default function OwnerDashboard() {
                       <p className="text-sm text-ink-500 flex items-center gap-1.5 mb-4">
                         <FiMapPin className="text-pitch-600 text-xs" /> {turf.city}
                       </p>
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 mb-2">
                         <Link to={`/owner/edit-turf/${turf._id}`}
                           className="flex-1 flex items-center justify-center gap-1.5 btn-outline text-sm py-2">
                           <FiEdit2 className="text-xs" /> Edit
@@ -140,6 +141,8 @@ export default function OwnerDashboard() {
                           <FiTrash2 className="text-xs" />
                         </button>
                       </div>
+                      {/* Box manager inline */}
+                      <BoxManager turfId={turf._id} turfTimeSlots={turf.timeSlots || []} />
                     </div>
                   </motion.div>
                 ))}
@@ -166,6 +169,11 @@ export default function OwnerDashboard() {
                 </div>
                 <div className="flex items-center gap-4 text-sm flex-wrap">
                   <span className="text-ink-500">{b.date} &bull; {b.timeSlot}</span>
+                  {b.box?.name && (
+                    <span className="flex items-center gap-1 text-xs font-bold px-2.5 py-1 rounded-full bg-pitch-50 border border-pitch-200 text-pitch-700">
+                      📦 {b.box.name}
+                    </span>
+                  )}
                   <span className="text-pitch-700 font-bold">&#8377;{b.totalPrice}</span>
                   <span className={
                     b.status === 'confirmed' ? 'badge-green' :

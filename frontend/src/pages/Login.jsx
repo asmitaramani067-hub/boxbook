@@ -56,7 +56,12 @@ export default function Login() {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Password</label>
+            <div className="flex items-center justify-between mb-2">
+              <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider">Password</label>
+              <Link to="/forgot-password" className="text-xs text-pitch-700 hover:underline font-semibold">
+                Forgot password?
+              </Link>
+            </div>
             <div className="relative">
               <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 text-sm" />
               <input type={showPass ? 'text' : 'password'} required value={form.password}

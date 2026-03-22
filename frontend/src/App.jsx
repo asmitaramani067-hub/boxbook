@@ -11,6 +11,8 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import TurfList from './pages/TurfList';
 import TurfDetail from './pages/TurfDetail';
 import MyBookings from './pages/MyBookings';
@@ -41,6 +43,8 @@ export default function App() {
               <Route path="/" element={<PageWrapper><Home /></PageWrapper>} />
               <Route path="/login" element={<PageWrapper><Login /></PageWrapper>} />
               <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
+              <Route path="/forgot-password" element={<PageWrapper><ForgotPassword /></PageWrapper>} />
+              <Route path="/reset-password/:token" element={<PageWrapper><ResetPassword /></PageWrapper>} />
               <Route path="/turfs" element={<PageWrapper><TurfList /></PageWrapper>} />
               <Route path="/turfs/:id" element={<PageWrapper><TurfDetail /></PageWrapper>} />
               <Route path="/explore" element={<PageWrapper><ExploreTurfs /></PageWrapper>} />
