@@ -15,6 +15,8 @@ import TurfDetail from './pages/TurfDetail';
 import MyBookings from './pages/MyBookings';
 import OwnerDashboard from './pages/owner/Dashboard';
 import TurfForm from './pages/owner/TurfForm';
+import ExploreTurfs from './pages/ExploreTurfs';
+import ExploreTurfDetail from './pages/ExploreTurfDetail';
 
 function PageWrapper({ children }) {
   return (
@@ -31,7 +33,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <div className="min-h-screen bg-dark-900 text-white relative">
+        <div className="min-h-screen bg-ink-50 text-ink-900 relative">
           <Navbar />
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
@@ -40,6 +42,8 @@ export default function App() {
               <Route path="/register" element={<PageWrapper><Register /></PageWrapper>} />
               <Route path="/turfs" element={<PageWrapper><TurfList /></PageWrapper>} />
               <Route path="/turfs/:id" element={<PageWrapper><TurfDetail /></PageWrapper>} />
+              <Route path="/explore" element={<PageWrapper><ExploreTurfs /></PageWrapper>} />
+              <Route path="/explore/:id" element={<PageWrapper><ExploreTurfDetail /></PageWrapper>} />
               <Route path="/bookings" element={
                 <ProtectedRoute role="player">
                   <PageWrapper><MyBookings /></PageWrapper>
@@ -73,8 +77,9 @@ export default function App() {
           </AnimatePresence>
           <Footer />
           <Toaster position="top-right" toastOptions={{
-            style: { background: '#1a1a1a', color: '#fff', border: '1px solid rgba(255,255,255,0.1)' },
-            success: { iconTheme: { primary: '#39FF14', secondary: '#000' } },
+            style: { background: '#fff', color: '#111827', border: '1px solid #E5E7EB', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' },
+            success: { iconTheme: { primary: '#2E7D32', secondary: '#fff' } },
+            error: { iconTheme: { primary: '#EF4444', secondary: '#fff' } },
           }} />
         </div>
       </AuthProvider>

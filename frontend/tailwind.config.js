@@ -4,41 +4,56 @@ export default {
   theme: {
     extend: {
       colors: {
-        neon: '#39FF14',
-        dark: {
-          950: '#050709',
-          900: '#080B10',
-          800: '#0d1017',
-          700: '#111318',
-          600: '#161a22',
-          500: '#1c2130',
+        // Cricket green palette
+        pitch: {
+          900: '#0D3B1A',
+          800: '#1B5E20',
+          700: '#2E7D32',
+          600: '#388E3C',
+          500: '#43A047',
+          400: '#66BB6A',
+          300: '#A5D6A7',
+          100: '#E8F5E9',
+          50:  '#F1F8F2',
+        },
+        // Cricket gold / ball seam
+        gold: {
+          600: '#D97706',
+          500: '#F59E0B',
+          400: '#FBBF24',
+          100: '#FEF3C7',
+          50:  '#FFFBEB',
+        },
+        // Neutral
+        ink: {
+          900: '#111827',
+          800: '#1F2937',
+          700: '#374151',
+          600: '#4B5563',
+          500: '#6B7280',
+          400: '#9CA3AF',
+          300: '#D1D5DB',
+          200: '#E5E7EB',
+          100: '#F3F4F6',
+          50:  '#F9FAFB',
         },
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       animation: {
-        'pulse-neon': 'pulseNeon 2.5s ease-in-out infinite',
         'float': 'float 4s ease-in-out infinite',
         'shimmer': 'shimmer 2s linear infinite',
-        'spin-slow': 'spin 8s linear infinite',
       },
       keyframes: {
-        pulseNeon: {
-          '0%, 100%': { boxShadow: '0 0 10px rgba(57,255,20,0.3), 0 0 20px rgba(57,255,20,0.1)' },
-          '50%': { boxShadow: '0 0 30px rgba(57,255,20,0.6), 0 0 60px rgba(57,255,20,0.3)' },
-        },
         float: {
           '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-12px)' },
+          '50%': { transform: 'translateY(-10px)' },
         },
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
-      },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
       },
     },
   },

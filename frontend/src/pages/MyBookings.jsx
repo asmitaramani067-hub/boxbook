@@ -8,9 +8,9 @@ import { staggerContainer, fadeUp } from '../animations/variants';
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&q=80';
 
 const STATUS = {
-  confirmed: { label: 'Confirmed', style: { background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)', color: '#39FF14' } },
-  pending: { label: 'Pending', style: { background: 'rgba(250,204,21,0.08)', border: '1px solid rgba(250,204,21,0.2)', color: '#facc15' } },
-  cancelled: { label: 'Cancelled', style: { background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' } },
+  confirmed: { label: 'Confirmed', cls: 'badge-green' },
+  pending:   { label: 'Pending',   cls: 'badge-gold' },
+  cancelled: { label: 'Cancelled', cls: 'badge-red' },
 };
 
 export default function MyBookings() {
@@ -42,25 +42,25 @@ export default function MyBookings() {
   };
 
   if (loading) return (
-    <div className="min-h-screen pt-20 flex items-center justify-center bg-dark-900">
-      <div className="w-10 h-10 border-2 border-neon border-t-transparent rounded-full animate-spin" />
+    <div className="min-h-screen pt-20 flex items-center justify-center bg-ink-50">
+      <div className="w-10 h-10 border-2 border-pitch-700 border-t-transparent rounded-full animate-spin" />
     </div>
   );
 
   return (
-    <div className="min-h-screen pt-20 pb-16 px-4 bg-dark-900">
+    <div className="min-h-screen pt-20 pb-16 px-4 bg-ink-50">
       <div className="max-w-4xl mx-auto">
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <p className="text-neon text-xs font-semibold tracking-widest uppercase mb-2">History</p>
-          <h1 className="text-3xl font-black text-white">My Bookings</h1>
-          <p className="text-gray-500 mt-1 text-sm">{bookings.length} total bookings</p>
+          <div className="accent-bar" />
+          <h1 className="text-3xl font-black text-ink-900">My Bookings</h1>
+          <p className="text-ink-500 mt-1 text-sm">{bookings.length} total bookings</p>
         </motion.div>
 
         {bookings.length === 0 ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-center py-24">
             <p className="text-6xl mb-4">🏏</p>
-            <h3 className="text-xl font-bold mb-2 text-white">No bookings yet</h3>
-            <p className="text-gray-500 mb-6">Find a turf and make your first booking!</p>
+            <h3 className="text-xl font-bold mb-2 text-ink-900">No bookings yet</h3>
+            <p className="text-ink-500 mb-6">Find a turf and make your first booking!</p>
             <a href="/turfs" className="btn-primary">Find Turfs</a>
           </motion.div>
         ) : (
@@ -69,10 +69,7 @@ export default function MyBookings() {
               const status = STATUS[b.status] || STATUS.pending;
               return (
                 <motion.div key={b._id} variants={fadeUp}
-                  className="rounded-2xl overflow-hidden transition-all duration-200"
-                  style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'}>
+                  className="card card-hover rounded-2xl overflow-hidden">
                   <div className="flex flex-col sm:flex-row">
                     <div className="sm:w-32 h-32 sm:h-auto flex-shrink-0">
                       <img src={b.turf?.images?.[0] || PLACEHOLDER} alt={b.turf?.name}
@@ -81,30 +78,27 @@ export default function MyBookings() {
                     <div className="flex-1 p-5">
                       <div className="flex items-start justify-between flex-wrap gap-3">
                         <div>
-                          <h3 className="font-bold text-base text-white">{b.turf?.name}</h3>
-                          <div className="flex items-center gap-1.5 text-sm text-gray-500 mt-1">
-                            <FiMapPin className="text-neon text-xs" /> {b.turf?.location}
+                          <h3 className="font-bold text-base text-ink-900">{b.turf?.name}</h3>
+                          <div className="flex items-center gap-1.5 text-sm text-ink-500 mt-1">
+                            <FiMapPin className="text-pitch-600 text-xs" /> {b.turf?.location}
                           </div>
                         </div>
-                        <span className="text-xs font-semibold px-3 py-1 rounded-full capitalize"
-                          style={status.style}>
-                          {status.label}
-                        </span>
+                        <span className={status.cls}>{status.label}</span>
                       </div>
 
-                      <div className="flex flex-wrap gap-4 mt-3 text-sm text-gray-400">
+                      <div className="flex flex-wrap gap-4 mt-3 text-sm text-ink-500">
                         <div className="flex items-center gap-1.5">
-                          <FiCalendar className="text-neon text-xs" /> {b.date}
+                          <FiCalendar className="text-pitch-600 text-xs" /> {b.date}
                         </div>
                         <div className="flex items-center gap-1.5">
-                          <FiClock className="text-neon text-xs" /> {b.timeSlot}
+                          <FiClock className="text-pitch-600 text-xs" /> {b.timeSlot}
                         </div>
-                        <div className="font-bold text-neon">&#8377;{b.totalPrice}</div>
+                        <div className="font-bold text-pitch-700">&#8377;{b.totalPrice}</div>
                       </div>
 
                       {b.status === 'confirmed' && (
                         <button onClick={() => cancelBooking(b._id)}
-                          className="mt-3 flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors">
+                          className="mt-3 flex items-center gap-1.5 text-xs text-red-500 hover:text-red-600 transition-colors font-medium">
                           <FiX className="text-xs" /> Cancel Booking
                         </button>
                       )}

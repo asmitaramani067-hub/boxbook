@@ -16,10 +16,8 @@ const DEFAULT_SLOTS = [
 const AMENITIES_LIST = ['Floodlights', 'Parking', 'Changing Room', 'Drinking Water', 'Washroom', 'Cafeteria', 'First Aid', 'Equipment Rental'];
 
 const Section = ({ title, children }) => (
-  <motion.div variants={fadeUp}
-    className="rounded-2xl p-6 space-y-4"
-    style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}>
-    <h2 className="font-bold text-base text-white">{title}</h2>
+  <motion.div variants={fadeUp} className="card p-6 space-y-4">
+    <h2 className="font-bold text-base text-ink-900 border-b border-ink-100 pb-3">{title}</h2>
     {children}
   </motion.div>
 );
@@ -112,19 +110,17 @@ export default function TurfForm() {
   };
 
   return (
-    <div className="min-h-screen pt-20 pb-16 px-4 bg-dark-900">
+    <div className="min-h-screen pt-20 pb-16 px-4 bg-ink-50">
       <div className="max-w-3xl mx-auto">
         <button onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-gray-500 hover:text-white mb-6 transition-colors text-sm">
+          className="flex items-center gap-2 text-ink-500 hover:text-pitch-700 mb-6 transition-colors text-sm font-medium">
           <FiArrowLeft /> Back
         </button>
 
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
-          <p className="text-neon text-xs font-semibold tracking-widest uppercase mb-2">
-            {isEdit ? 'Edit' : 'New'}
-          </p>
-          <h1 className="text-3xl font-black text-white">{isEdit ? 'Edit Turf' : 'Add New Turf'}</h1>
-          <p className="text-gray-500 mt-1 text-sm">{isEdit ? 'Update your turf details' : 'List your turf on BoxBook'}</p>
+          <div className="accent-bar" />
+          <h1 className="text-3xl font-black text-ink-900">{isEdit ? 'Edit Turf' : 'Add New Turf'}</h1>
+          <p className="text-ink-500 mt-1 text-sm">{isEdit ? 'Update your turf details' : 'List your turf on BoxBook'}</p>
         </motion.div>
 
         <motion.form initial="hidden" animate="visible" variants={staggerContainer}
@@ -133,63 +129,59 @@ export default function TurfForm() {
           <Section title="Basic Information">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Turf Name *</label>
+                <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Turf Name *</label>
                 <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
                   placeholder="e.g. Green Arena Box Cricket" className="input-field text-sm" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">City *</label>
+                <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">City *</label>
                 <select required value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
                   className="input-field appearance-none cursor-pointer text-sm">
-                  <option value="" style={{ background: '#111318' }}>-- Select City --</option>
-                  {CITIES.map(c => <option key={c} value={c} style={{ background: '#111318' }}>{c}</option>)}
+                  <option value="">-- Select City --</option>
+                  {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Full Address *</label>
+              <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Full Address *</label>
               <input required value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
                 placeholder="Street, Area, City" className="input-field text-sm" />
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Description</label>
+              <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Description</label>
               <textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))}
                 placeholder="Describe your turf..." rows={3} className="input-field resize-none text-sm" />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Price per Hour (&#8377;) *</label>
+                <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Price per Hour (&#8377;) *</label>
                 <input type="number" required min="1" value={form.pricePerHour}
                   onChange={e => setForm(f => ({ ...f, pricePerHour: e.target.value }))}
                   placeholder="e.g. 800" className="input-field text-sm" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Contact Number *</label>
+                <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Contact Number *</label>
                 <input required value={form.contactNumber} onChange={e => setForm(f => ({ ...f, contactNumber: e.target.value }))}
                   placeholder="+91 98765 43210" className="input-field text-sm" />
               </div>
             </div>
             <div>
-              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 block">Google Maps Link</label>
+              <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Google Maps Link</label>
               <input value={form.mapLink} onChange={e => setForm(f => ({ ...f, mapLink: e.target.value }))}
                 placeholder="https://maps.google.com/..." className="input-field text-sm" />
             </div>
           </Section>
 
           <Section title="Turf Images">
-            <label className="flex flex-col items-center justify-center h-32 rounded-xl cursor-pointer transition-all duration-200"
-              style={{ border: '2px dashed rgba(255,255,255,0.12)' }}
-              onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(57,255,20,0.4)'}
-              onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'}>
-              <FiUpload className="text-2xl text-gray-500 mb-2" />
-              <span className="text-sm text-gray-500">Click to upload images (max 5)</span>
+            <label className="flex flex-col items-center justify-center h-32 rounded-xl cursor-pointer transition-all duration-200 border-2 border-dashed border-ink-300 hover:border-pitch-600 hover:bg-pitch-50">
+              <FiUpload className="text-2xl text-ink-500 mb-2" />
+              <span className="text-sm text-ink-500">Click to upload images (max 5)</span>
               <input type="file" multiple accept="image/*" onChange={handleImageChange} className="hidden" />
             </label>
             {previews.length > 0 && (
               <div className="flex gap-3 flex-wrap">
                 {previews.map((p, i) => (
-                  <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden"
-                    style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+                  <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border border-ink-200">
                     <img src={p.startsWith('/') ? `http://localhost:5000${p}` : p} alt="" className="w-full h-full object-cover" />
                   </div>
                 ))}
@@ -203,9 +195,9 @@ export default function TurfForm() {
                 <button key={slot} type="button" onClick={() => toggleSlot(slot)}
                   className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200"
                   style={{
-                    background: form.timeSlots.includes(slot) ? '#39FF14' : 'rgba(255,255,255,0.04)',
-                    border: form.timeSlots.includes(slot) ? '1px solid #39FF14' : '1px solid rgba(255,255,255,0.08)',
-                    color: form.timeSlots.includes(slot) ? '#000' : '#9ca3af',
+                    background: form.timeSlots.includes(slot) ? '#2E7D32' : '#F9FAFB',
+                    border: form.timeSlots.includes(slot) ? '1px solid #2E7D32' : '1px solid #E5E7EB',
+                    color: form.timeSlots.includes(slot) ? '#fff' : '#374151',
                   }}>
                   {slot}
                 </button>
@@ -221,10 +213,9 @@ export default function TurfForm() {
             {form.timeSlots.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {form.timeSlots.map(s => (
-                  <span key={s} className="flex items-center gap-1.5 text-xs text-neon px-3 py-1 rounded-full"
-                    style={{ background: 'rgba(57,255,20,0.08)', border: '1px solid rgba(57,255,20,0.2)' }}>
+                  <span key={s} className="badge-green flex items-center gap-1.5">
                     {s}
-                    <button type="button" onClick={() => toggleSlot(s)} className="hover:text-white transition-colors">
+                    <button type="button" onClick={() => toggleSlot(s)} className="hover:text-pitch-900 transition-colors">
                       <FiX className="text-xs" />
                     </button>
                   </span>
@@ -239,9 +230,9 @@ export default function TurfForm() {
                 <button key={a} type="button" onClick={() => toggleAmenity(a)}
                   className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200"
                   style={{
-                    background: form.amenities.includes(a) ? '#39FF14' : 'rgba(255,255,255,0.04)',
-                    border: form.amenities.includes(a) ? '1px solid #39FF14' : '1px solid rgba(255,255,255,0.08)',
-                    color: form.amenities.includes(a) ? '#000' : '#9ca3af',
+                    background: form.amenities.includes(a) ? '#2E7D32' : '#F9FAFB',
+                    border: form.amenities.includes(a) ? '1px solid #2E7D32' : '1px solid #E5E7EB',
+                    color: form.amenities.includes(a) ? '#fff' : '#374151',
                   }}>
                   {a}
                 </button>
@@ -253,7 +244,7 @@ export default function TurfForm() {
             whileTap={{ scale: 0.97 }}
             className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-base disabled:opacity-60">
             {loading
-              ? <span className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+              ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               : isEdit ? 'Update Turf' : 'Add Turf'}
           </motion.button>
         </motion.form>
