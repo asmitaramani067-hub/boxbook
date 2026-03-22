@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
   avatar: { type: String },
   resetPasswordToken: { type: String },
   resetPasswordExpire: { type: Date },
+  pushSubscription: { type: Object, default: null },
 }, { timestamps: true });
 
 userSchema.pre('save', async function () {

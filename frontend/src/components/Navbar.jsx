@@ -1,11 +1,13 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   FiMenu, FiX, FiLogOut, FiGrid, FiCalendar,
-  FiPlusCircle, FiChevronDown, FiCompass, FiPhone
+  FiPlusCircle, FiChevronDown, FiCompass, FiPhone, FiBell
 } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
+import api from '../services/api';
+import { subscribeToPush } from '../utils/pushSubscribe';
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -14,6 +16,41 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [dropOpen, setDropOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [bellOpen, setBellOpen] = useState(false);
+  const bellRef = useRef(null);
+
+  const unreadCount = notifications.filter(n => !n.isRead).length;
+
+  useEffect(() => {
+    if (user?.role === 'owner') {
+      fetchNotifications();
+      subscribeToPush(); // ask permission + subscribe on first login
+      const interval = setInterval(fetchNotifications, 30000);
+      return () => clearInterval(interval);
+    }
+  }, [user]);
+
+  const fetchNotifications = async () => {
+    try {
+      const res = await api.get('/notifications');
+      setNotifications(res.data);
+    } catch {}
+  };
+
+  const markAllRead = async () => {
+    try {
+      await api.patch('/notifications/read-all');
+      setNotifications(n => n.map(x => ({ ...x, isRead: true })));
+    } catch {}
+  };
+
+  // Close bell dropdown on outside click
+  useEffect(() => {
+    const handler = (e) => { if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false); };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -95,6 +132,51 @@ export default function Navbar() {
 
           {/* Right side */}
           <div className="flex items-center gap-2">
+            {/* Bell icon — owner only */}
+            {user?.role === 'owner' && (
+              <div className="relative" ref={bellRef}>
+                <button onClick={() => { setBellOpen(o => !o); if (!bellOpen) markAllRead(); }}
+                  className="relative p-2 rounded-xl text-ink-600 hover:bg-ink-100 transition-colors">
+                  <FiBell className="text-xl" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </button>
+                <AnimatePresence>
+                  {bellOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-80 rounded-2xl overflow-hidden bg-white border border-ink-200 shadow-2xl"
+                      style={{ zIndex: 9999 }}>
+                      <div className="px-4 py-3 border-b border-ink-100 flex items-center justify-between">
+                        <span className="font-bold text-ink-900 text-sm">Notifications</span>
+                        {notifications.length > 0 && (
+                          <button onClick={markAllRead} className="text-xs text-pitch-700 font-semibold hover:underline">
+                            Mark all read
+                          </button>
+                        )}
+                      </div>
+                      <div className="max-h-72 overflow-y-auto">
+                        {notifications.length === 0 ? (
+                          <p className="text-center text-ink-400 text-sm py-8">No notifications yet</p>
+                        ) : notifications.map(n => (
+                          <div key={n._id}
+                            className={`px-4 py-3 border-b border-ink-50 text-sm ${n.isRead ? 'text-ink-500' : 'text-ink-900 bg-pitch-50'}`}>
+                            <p className={`${!n.isRead ? 'font-semibold' : ''}`}>{n.message}</p>
+                            <p className="text-xs text-ink-400 mt-0.5">{new Date(n.createdAt).toLocaleString()}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            )}
             {user ? (
               <div className="relative">
                 <button onClick={() => setDropOpen(d => !d)}
