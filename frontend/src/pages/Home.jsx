@@ -511,8 +511,8 @@ export default function Home() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
               {[
-                { icon: FiPhone, title: 'Call Us', value: '+91 98765 43210', sub: 'Mon–Sat, 9am–8pm', href: 'tel:+919876543210', gradient: 'from-blue-500 to-blue-700', light: 'bg-blue-50', border: 'border-blue-100' },
-                { icon: FiMessageCircle, title: 'WhatsApp', value: '+91 98765 43210', sub: 'Quick replies guaranteed', href: 'https://wa.me/919876543210', gradient: 'from-pitch-500 to-pitch-700', light: 'bg-pitch-50', border: 'border-pitch-100' },
+                { icon: FiPhone, title: 'Call Us', value: '+91 98751 23271', sub: 'Mon–Sat, 9am–8pm', href: 'tel:+919875123271', gradient: 'from-blue-500 to-blue-700', light: 'bg-blue-50', border: 'border-blue-100' },
+                { icon: FiMessageCircle, title: 'WhatsApp', value: '+91 98751 23271', sub: 'Quick replies guaranteed', href: 'https://wa.me/919875123271', gradient: 'from-pitch-500 to-pitch-700', light: 'bg-pitch-50', border: 'border-pitch-100' },
                 { icon: FiMail, title: 'Email Us', value: 'support@pitchup.in', sub: 'Reply within 24 hours', href: 'mailto:support@pitchup.in', gradient: 'from-purple-500 to-purple-700', light: 'bg-purple-50', border: 'border-purple-100' },
               ].map((c, i) => (
                 <motion.a key={i} variants={fadeUp} href={c.href} target="_blank" rel="noreferrer"
