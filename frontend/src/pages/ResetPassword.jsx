@@ -1,28 +1,38 @@
 import { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiLock, FiEye, FiEyeOff, FiArrowRight } from 'react-icons/fi';
+import { FiLock, FiEye, FiEyeOff, FiArrowRight, FiAlertCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import { fadeUp, staggerContainer } from '../animations/variants';
+
+function FieldError({ msg }) {
+  if (!msg) return null;
+  return <p className="field-error"><FiAlertCircle className="text-xs flex-shrink-0" /> {msg}</p>;
+}
 
 export default function ResetPassword() {
   const { token } = useParams();
   const navigate = useNavigate();
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
+  const [errors, setErrors] = useState({});
   const [showPass, setShowPass] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (password.length < 6) return toast.error('Password must be at least 6 characters');
-    if (password !== confirm) return toast.error('Passwords do not match');
+    const errs = {};
+    if (!password) errs.password = 'Password is required';
+    else if (password.length < 6) errs.password = 'Password must be at least 6 characters';
+    if (!confirm) errs.confirm = 'Please confirm your password';
+    else if (password !== confirm) errs.confirm = 'Passwords do not match';
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setErrors({});
     setLoading(true);
     try {
       const { data } = await api.put(`/auth/reset-password/${token}`, { password });
       toast.success('Password reset! Logging you in...');
-      // Auto-login with returned token
       if (data.token) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('user', JSON.stringify(data.user));
@@ -31,7 +41,7 @@ export default function ResetPassword() {
         navigate('/login');
       }
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Reset failed. Link may have expired.');
+      setErrors({ password: err.response?.data?.message || 'Reset failed. Link may have expired.' });
     } finally {
       setLoading(false);
     }
@@ -63,14 +73,15 @@ export default function ResetPassword() {
                 <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 text-sm" />
                 <input
                   type={showPass ? 'text' : 'password'} required
-                  value={password} onChange={e => setPassword(e.target.value)}
+                  value={password} onChange={e => { setPassword(e.target.value); setErrors(er => ({ ...er, password: '' })); }}
                   placeholder="Min 6 characters"
-                  className="input-field pl-11 pr-11 text-sm" />
+                  className={`input-field pl-11 pr-11 text-sm ${errors.password ? 'input-error' : ''}`} />
                 <button type="button" onClick={() => setShowPass(s => !s)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-ink-400 hover:text-ink-700 transition-colors">
                   {showPass ? <FiEyeOff className="text-sm" /> : <FiEye className="text-sm" />}
                 </button>
               </div>
+              <FieldError msg={errors.password} />
             </div>
 
             <div>
@@ -81,13 +92,11 @@ export default function ResetPassword() {
                 <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 text-sm" />
                 <input
                   type={showPass ? 'text' : 'password'} required
-                  value={confirm} onChange={e => setConfirm(e.target.value)}
+                  value={confirm} onChange={e => { setConfirm(e.target.value); setErrors(er => ({ ...er, confirm: '' })); }}
                   placeholder="Repeat your password"
-                  className="input-field pl-11 text-sm" />
+                  className={`input-field pl-11 text-sm ${errors.confirm ? 'input-error' : ''}`} />
               </div>
-              {confirm && password !== confirm && (
-                <p className="text-xs text-red-500 mt-1.5 font-medium">Passwords don't match</p>
-              )}
+              <FieldError msg={errors.confirm} />
             </div>
 
             {/* Strength hint */}
@@ -107,8 +116,7 @@ export default function ResetPassword() {
             )}
 
             <button type="submit" disabled={loading || password !== confirm || password.length < 6}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-pitch-700 to-pitch-600 text-white hover:from-pitch-800 hover:to-pitch-700 transition-all duration-200 shadow-lg shadow-pitch-700/25 disabled:opacity-50">
-              {loading
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-sm bg-gradient-to-r from-pitch-700 to-pitch-600 text-white hover:from-pitch-800 hover:to-pitch-700 transition-all duration-200 shadow-lg shadow-pitch-700/25 disabled:opacity-50">              {loading
                 ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 : <><span>Reset Password</span><FiArrowRight className="text-sm" /></>}
             </button>

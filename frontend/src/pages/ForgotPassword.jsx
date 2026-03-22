@@ -1,24 +1,34 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiMail, FiArrowLeft, FiSend } from 'react-icons/fi';
+import { FiMail, FiArrowLeft, FiSend, FiAlertCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import { fadeUp, staggerContainer } from '../animations/variants';
 
+function FieldError({ msg }) {
+  if (!msg) return null;
+  return <p className="field-error"><FiAlertCircle className="text-xs flex-shrink-0" /> {msg}</p>;
+}
+
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!email) { setEmailError('Email is required'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setEmailError('Enter a valid email address'); return; }
+    setEmailError('');
     setLoading(true);
     try {
       await api.post('/auth/forgot-password', { email });
       setSent(true);
     } catch (err) {
-      toast.error(err.response?.data?.message || 'Something went wrong');
+      const msg = err.response?.data?.message || 'Something went wrong';
+      setEmailError(msg);
     } finally {
       setLoading(false);
     }
@@ -79,10 +89,11 @@ export default function ForgotPassword() {
                     <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-ink-400 text-sm" />
                     <input
                       type="email" required value={email}
-                      onChange={e => setEmail(e.target.value)}
+                      onChange={e => { setEmail(e.target.value); setEmailError(''); }}
                       placeholder="you@example.com"
-                      className="input-field pl-11 text-sm" />
+                      className={`input-field pl-11 text-sm ${emailError ? 'input-error' : ''}`} />
                   </div>
+                  <FieldError msg={emailError} />
                 </div>
 
                 <button type="submit" disabled={loading}

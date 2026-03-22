@@ -6,6 +6,7 @@ import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { staggerContainer, fadeUp } from '../../animations/variants';
 import BoxManager from './BoxManager';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&q=80';
 
@@ -14,6 +15,7 @@ export default function OwnerDashboard() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('turfs');
+  const [confirmDelete, setConfirmDelete] = useState(null); // turfId to delete
 
   useEffect(() => { fetchData(); }, []);
 
@@ -33,13 +35,14 @@ export default function OwnerDashboard() {
   };
 
   const deleteTurf = async (id) => {
-    if (!confirm('Delete this turf? This cannot be undone.')) return;
     try {
       await api.delete(`/turfs/${id}`);
       toast.success('Turf deleted');
       setTurfs(t => t.filter(x => x._id !== id));
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete');
+    } finally {
+      setConfirmDelete(null);
     }
   };
 
@@ -136,7 +139,7 @@ export default function OwnerDashboard() {
                           className="flex-1 flex items-center justify-center gap-1.5 btn-outline text-sm py-2">
                           <FiEdit2 className="text-xs" /> Edit
                         </Link>
-                        <button onClick={() => deleteTurf(turf._id)}
+                        <button onClick={() => setConfirmDelete(turf._id)}
                           className="flex items-center gap-1 px-4 py-2 rounded-xl text-red-500 hover:bg-red-50 transition-colors text-sm border border-red-200">
                           <FiTrash2 className="text-xs" />
                         </button>
@@ -187,6 +190,16 @@ export default function OwnerDashboard() {
           </motion.div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        title="Delete Turf?"
+        message="This will permanently delete the turf and cannot be undone."
+        confirmText="Delete"
+        danger
+        onConfirm={() => deleteTurf(confirmDelete)}
+        onCancel={() => setConfirmDelete(null)}
+      />
     </div>
   );
 }

@@ -4,6 +4,7 @@ import { FiMapPin, FiClock, FiCalendar, FiX, FiArrowRight } from 'react-icons/fi
 import toast from 'react-hot-toast';
 import api from '../services/api';
 import { staggerContainer, fadeUp } from '../animations/variants';
+import ConfirmDialog from '../components/ConfirmDialog';
 
 const PLACEHOLDER = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=400&q=80';
 
@@ -17,6 +18,7 @@ export default function MyBookings() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [confirmCancel, setConfirmCancel] = useState(null); // bookingId
 
   useEffect(() => { fetchBookings(); }, []);
 
@@ -32,13 +34,14 @@ export default function MyBookings() {
   };
 
   const cancelBooking = async (id) => {
-    if (!confirm('Cancel this booking?')) return;
     try {
       await api.put(`/bookings/${id}/cancel`);
       toast.success('Booking cancelled');
       fetchBookings();
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to cancel');
+    } finally {
+      setConfirmCancel(null);
     }
   };
 
@@ -137,7 +140,7 @@ export default function MyBookings() {
                       </div>
 
                       {b.status === 'confirmed' && (
-                        <button onClick={() => cancelBooking(b._id)}
+                        <button onClick={() => setConfirmCancel(b._id)}
                           className="mt-3 flex items-center gap-1 text-xs text-red-500 hover:text-red-600 font-semibold transition-colors">
                           <FiX className="text-xs" /> Cancel
                         </button>
@@ -150,6 +153,16 @@ export default function MyBookings() {
           </motion.div>
         )}
       </div>
+
+      <ConfirmDialog
+        open={!!confirmCancel}
+        title="Cancel Booking?"
+        message="Are you sure you want to cancel this booking? This action cannot be undone."
+        confirmText="Yes, Cancel"
+        danger
+        onConfirm={() => cancelBooking(confirmCancel)}
+        onCancel={() => setConfirmCancel(null)}
+      />
     </div>
   );
 }

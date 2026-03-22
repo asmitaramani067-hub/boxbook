@@ -1,11 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiPlus, FiX, FiUpload, FiArrowLeft } from 'react-icons/fi';
+import { FiPlus, FiX, FiUpload, FiArrowLeft, FiAlertCircle } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { fadeUp, staggerContainer } from '../../animations/variants';
 import { CITIES } from '../../constants';
+
+function FieldError({ msg }) {
+  if (!msg) return null;
+  return <p className="field-error"><FiAlertCircle className="text-xs flex-shrink-0" /> {msg}</p>;
+}
 
 const DEFAULT_SLOTS = [
   '06:00-07:00', '07:00-08:00', '08:00-09:00', '09:00-10:00',
@@ -36,6 +41,7 @@ export default function TurfForm() {
   const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [customSlot, setCustomSlot] = useState('');
+  const [errors, setErrors] = useState({});
 
   useEffect(() => { if (isEdit) fetchTurf(); }, [id]);
 
@@ -85,6 +91,16 @@ export default function TurfForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    // Inline validation
+    const errs = {};
+    if (!form.name.trim()) errs.name = 'Turf name is required';
+    if (!form.city) errs.city = 'Please select a city';
+    if (!form.location.trim()) errs.location = 'Address is required';
+    if (!form.pricePerHour || Number(form.pricePerHour) < 1) errs.pricePerHour = 'Enter a valid price';
+    if (!form.contactNumber.trim()) errs.contactNumber = 'Contact number is required';
+    else if (!/^[+\d\s\-()]{7,15}$/.test(form.contactNumber)) errs.contactNumber = 'Enter a valid contact number';
+    if (Object.keys(errs).length) { setErrors(errs); return; }
+    setErrors({});
     setLoading(true);
     try {
       const fd = new FormData();
@@ -130,22 +146,27 @@ export default function TurfForm() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Turf Name *</label>
-                <input required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
-                  placeholder="e.g. Green Arena Box Cricket" className="input-field text-sm" />
+                <input required value={form.name} onChange={e => { setForm(f => ({ ...f, name: e.target.value })); setErrors(er => ({ ...er, name: '' })); }}
+                  placeholder="e.g. Green Arena Box Cricket"
+                  className={`input-field text-sm ${errors.name ? 'input-error' : ''}`} />
+                <FieldError msg={errors.name} />
               </div>
               <div>
                 <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">City *</label>
-                <select required value={form.city} onChange={e => setForm(f => ({ ...f, city: e.target.value }))}
-                  className="input-field appearance-none cursor-pointer text-sm">
+                <select required value={form.city} onChange={e => { setForm(f => ({ ...f, city: e.target.value })); setErrors(er => ({ ...er, city: '' })); }}
+                  className={`input-field appearance-none cursor-pointer text-sm ${errors.city ? 'input-error' : ''}`}>
                   <option value="">-- Select City --</option>
                   {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
+                <FieldError msg={errors.city} />
               </div>
             </div>
             <div>
               <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Full Address *</label>
-              <input required value={form.location} onChange={e => setForm(f => ({ ...f, location: e.target.value }))}
-                placeholder="Street, Area, City" className="input-field text-sm" />
+              <input required value={form.location} onChange={e => { setForm(f => ({ ...f, location: e.target.value })); setErrors(er => ({ ...er, location: '' })); }}
+                placeholder="Street, Area, City"
+                className={`input-field text-sm ${errors.location ? 'input-error' : ''}`} />
+              <FieldError msg={errors.location} />
             </div>
             <div>
               <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Description</label>
@@ -156,13 +177,18 @@ export default function TurfForm() {
               <div>
                 <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Price per Hour (&#8377;) *</label>
                 <input type="number" required min="1" value={form.pricePerHour}
-                  onChange={e => setForm(f => ({ ...f, pricePerHour: e.target.value }))}
-                  placeholder="e.g. 800" className="input-field text-sm" />
+                  onChange={e => { setForm(f => ({ ...f, pricePerHour: e.target.value })); setErrors(er => ({ ...er, pricePerHour: '' })); }}
+                  placeholder="e.g. 800"
+                  className={`input-field text-sm ${errors.pricePerHour ? 'input-error' : ''}`} />
+                <FieldError msg={errors.pricePerHour} />
               </div>
               <div>
                 <label className="text-xs font-semibold text-ink-500 uppercase tracking-wider mb-2 block">Contact Number *</label>
-                <input required value={form.contactNumber} onChange={e => setForm(f => ({ ...f, contactNumber: e.target.value }))}
-                  placeholder="+91 98751 23271" className="input-field text-sm" />
+                <input required value={form.contactNumber}
+                  onChange={e => { setForm(f => ({ ...f, contactNumber: e.target.value })); setErrors(er => ({ ...er, contactNumber: '' })); }}
+                  placeholder="+91 98751 23271"
+                  className={`input-field text-sm ${errors.contactNumber ? 'input-error' : ''}`} />
+                <FieldError msg={errors.contactNumber} />
               </div>
             </div>
             <div>

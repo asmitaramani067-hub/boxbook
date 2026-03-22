@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiPlus, FiX, FiEdit2, FiCheck, FiBox } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
+import ConfirmDialog from '../../components/ConfirmDialog';
 
 const DEFAULT_SLOTS = [
   '06:00-07:00','07:00-08:00','08:00-09:00','09:00-10:00','10:00-11:00',
@@ -55,6 +56,7 @@ export default function BoxManager({ turfId, turfTimeSlots = [] }) {
   const [editId, setEditId] = useState(null);
   const [form, setForm] = useState({ name: '', description: '', timeSlots: [] });
   const [saving, setSaving] = useState(false);
+  const [confirmDeleteBox, setConfirmDeleteBox] = useState(null); // boxId
 
   useEffect(() => { fetchBoxes(); }, [turfId]);
 
@@ -98,13 +100,14 @@ export default function BoxManager({ turfId, turfTimeSlots = [] }) {
   };
 
   const handleDelete = async (boxId) => {
-    if (!confirm('Delete this box? All its bookings will remain but no new bookings can be made.')) return;
     try {
       await api.delete(`/boxes/${boxId}`);
       setBoxes(b => b.filter(x => x._id !== boxId));
       toast.success('Box deleted');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Failed to delete');
+    } finally {
+      setConfirmDeleteBox(null);
     }
   };
 
@@ -143,7 +146,7 @@ export default function BoxManager({ turfId, turfTimeSlots = [] }) {
                 className="p-1.5 rounded-lg text-ink-500 hover:text-pitch-700 hover:bg-pitch-50 transition-colors">
                 <FiEdit2 className="text-xs" />
               </button>
-              <button onClick={() => handleDelete(box._id)}
+              <button onClick={() => setConfirmDeleteBox(box._id)}
                 className="p-1.5 rounded-lg text-ink-500 hover:text-red-500 hover:bg-red-50 transition-colors">
                 <FiX className="text-xs" />
               </button>
@@ -192,6 +195,16 @@ export default function BoxManager({ turfId, turfTimeSlots = [] }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConfirmDialog
+        open={!!confirmDeleteBox}
+        title="Delete Box?"
+        message="Existing bookings will remain but no new bookings can be made for this box."
+        confirmText="Delete"
+        danger
+        onConfirm={() => handleDelete(confirmDeleteBox)}
+        onCancel={() => setConfirmDeleteBox(null)}
+      />
     </div>
   );
 }

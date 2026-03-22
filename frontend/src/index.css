@@ -57,6 +57,13 @@
     @apply border-pitch-600;
     box-shadow: 0 0 0 3px rgba(46,125,50,0.1);
   }
+  .input-error {
+    @apply border-red-400 bg-red-50/40;
+    box-shadow: 0 0 0 3px rgba(239,68,68,0.1);
+  }
+  .field-error {
+    @apply text-xs text-red-500 font-medium mt-1.5 flex items-center gap-1;
+  }
 
   /* ── Section helpers ── */
   .section-title {
