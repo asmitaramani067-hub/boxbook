@@ -120,7 +120,7 @@ export default function TurfForm() {
         <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
           <div className="accent-bar" />
           <h1 className="text-3xl font-black text-ink-900">{isEdit ? 'Edit Turf' : 'Add New Turf'}</h1>
-          <p className="text-ink-500 mt-1 text-sm">{isEdit ? 'Update your turf details' : 'List your turf on BoxBook'}</p>
+          <p className="text-ink-500 mt-1 text-sm">{isEdit ? 'Update your turf details' : 'List your turf on PitchUp'}</p>
         </motion.div>
 
         <motion.form initial="hidden" animate="visible" variants={staggerContainer}

@@ -35,7 +35,7 @@ export default function Login() {
           <span className="text-pitch-700 text-3xl font-black">🏏</span>
         </div>
         <h1 className="text-3xl font-black text-white">Welcome back</h1>
-        <p className="text-pitch-200 mt-1.5 text-sm">Sign in to your BoxBook account</p>
+        <p className="text-pitch-200 mt-1.5 text-sm">Sign in to your PitchUp account</p>
       </div>
 
       <div className="flex justify-center px-4 -mt-8 pb-16">

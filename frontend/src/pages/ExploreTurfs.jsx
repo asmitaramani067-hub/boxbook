@@ -27,7 +27,7 @@ export default function ExploreTurfs() {
           <div className="accent-bar" />
           <h1 className="text-3xl font-black text-ink-900">Explore Cricket Venues</h1>
           <p className="text-ink-500 mt-1 text-sm">
-            Discover box cricket grounds across India — not yet on BoxBook, but you can contact them directly.
+            Discover box cricket grounds across India — not yet on PitchUp, but you can contact them directly.
           </p>
         </motion.div>
 
@@ -74,7 +74,7 @@ export default function ExploreTurfs() {
                     <img src={turf.image} alt={turf.name}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                    <span className="absolute top-3 right-3 badge-gold">Not on BoxBook</span>
+                    <span className="absolute top-3 right-3 badge-gold">Not on PitchUp</span>
                   </div>
                   <div className="p-4">
                     <h3 className="font-bold text-ink-900 mb-1">{turf.name}</h3>

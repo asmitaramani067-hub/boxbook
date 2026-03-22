@@ -19,7 +19,7 @@ export default function Register() {
     setLoading(true);
     try {
       const user = await register(form);
-      toast.success(`Welcome to BoxBook, ${user.name?.split(' ')[0]}!`);
+      toast.success(`Welcome to PitchUp, ${user.name?.split(' ')[0]}!`);
       navigate(user.role === 'owner' ? '/owner/dashboard' : '/turfs');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Registration failed');
@@ -32,7 +32,7 @@ export default function Register() {
     <div className="min-h-screen bg-ink-50">
       {/* Green header */}
       <div className="bg-pitch-700 pt-24 pb-16 px-4 text-center">
-        <h1 className="text-3xl font-black text-white">Join BoxBook</h1>
+        <h1 className="text-3xl font-black text-white">Join PitchUp</h1>
         <p className="text-pitch-200 mt-2 text-sm">Create your account and start playing</p>
       </div>
 

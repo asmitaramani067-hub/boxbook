@@ -9,10 +9,10 @@ export default function Footer() {
           <div className="w-9 h-9 rounded-xl bg-pitch-700 flex items-center justify-center">
             <GiCricketBat className="text-white text-lg" />
           </div>
-          <span className="text-xl font-black text-white">Box<span className="text-gold-400">Book</span></span>
+          <span className="text-xl font-black text-white">Pitch<span className="text-gold-400">Up</span></span>
         </div>
         <p className="text-sm text-pitch-400">
-          &copy; 2025 BoxBook. Book your game, own the field.
+          &copy; 2025 PitchUp. Book your game, own the field.
         </p>
         <div className="flex gap-3">
           {[FiInstagram, FiTwitter, FiMail].map((Icon, i) => (

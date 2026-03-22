@@ -19,7 +19,7 @@ export default function ExploreTurfDetail() {
     </div>
   );
 
-  const waMsg = encodeURIComponent(`Hi! I found your cricket venue "${turf.name}" on BoxBook. I'd like to book a slot. Please share availability.`);
+  const waMsg = encodeURIComponent(`Hi! I found your cricket venue "${turf.name}" on PitchUp. I'd like to book a slot. Please share availability.`);
 
   return (
     <div className="min-h-screen pt-20 pb-16 px-4 bg-ink-50">
@@ -37,7 +37,7 @@ export default function ExploreTurfDetail() {
               className="rounded-2xl overflow-hidden shadow-sm relative h-72 sm:h-96">
               <img src={turf.image} alt={turf.name} className="w-full h-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-              <span className="absolute top-4 right-4 badge-gold">Not on BoxBook</span>
+              <span className="absolute top-4 right-4 badge-gold">Not on PitchUp</span>
             </motion.div>
 
             {/* Info */}
@@ -90,7 +90,7 @@ export default function ExploreTurfDetail() {
 
               <motion.div variants={fadeUp}
                 className="rounded-xl p-4 bg-gold-50 border border-gold-400 text-sm text-gold-600">
-                <strong>Note:</strong> This venue is not yet on BoxBook. Contact them directly to book a slot.
+                <strong>Note:</strong> This venue is not yet on PitchUp. Contact them directly to book a slot.
               </motion.div>
             </motion.div>
           </div>

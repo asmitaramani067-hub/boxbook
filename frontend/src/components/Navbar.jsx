@@ -69,7 +69,7 @@ export default function Navbar() {
               </svg>
             </div>
             <span className="text-xl font-black tracking-tight text-ink-900">
-              Box<span className="text-pitch-700">Book</span>
+              Pitch<span className="text-pitch-700">Up</span>
             </span>
           </Link>
 

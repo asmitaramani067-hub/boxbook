@@ -16,6 +16,9 @@ const PREVIEW_IMGS = [
   'https://lh3.googleusercontent.com/p/AF1QipPcA45J2t8NeSviF6X3cCHzf797XxjefeBjSAmq=w243-h174-n-k-no-nu',
 ];
 
+// Box cricket turf background — green artificial turf with net enclosure feel
+const HERO_BG = 'https://images.unsplash.com/photo-1593766788306-28561086694e?w=1600&q=90';
+
 const FEATURES = [
   { icon: FiZap, title: 'Instant Booking', desc: 'Reserve your slot in under 60 seconds. No calls, no waiting.', gradient: 'from-amber-400 to-orange-500', light: 'bg-amber-50', border: 'border-amber-100' },
   { icon: FiShield, title: 'Verified Turfs', desc: 'Every turf is physically verified and quality-checked.', gradient: 'from-blue-400 to-blue-600', light: 'bg-blue-50', border: 'border-blue-100' },
@@ -46,17 +49,21 @@ export default function Home() {
     <div className="min-h-screen bg-ink-50">
 
       {/* ── HERO ── */}
-      <section className="relative flex flex-col items-center justify-center overflow-hidden pt-24 pb-0 bg-white">
-        {/* Background decoration */}
+      <section className="relative flex flex-col items-center justify-center overflow-hidden pt-24 pb-0">
+        {/* Background image with overlay */}
+        <div className="absolute inset-0">
+          <img src={HERO_BG} alt="Cricket turf" className="w-full h-full object-cover object-center" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/75" />
+          <div className="absolute inset-0 bg-pitch-900/20" />
+        </div>
+
+        {/* Background decoration (same as before) */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {/* Dot grid */}
-          <div className="absolute inset-0 opacity-[0.04]"
-            style={{ backgroundImage: 'radial-gradient(circle, #2E7D32 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
           {/* Floating cricket ball */}
           <motion.div
             animate={{ y: [0, -18, 0], rotate: [0, 360] }}
             transition={{ y: { repeat: Infinity, duration: 4, ease: 'easeInOut' }, rotate: { repeat: Infinity, duration: 8, ease: 'linear' } }}
-            className="absolute top-16 right-[8%] opacity-20">
+            className="absolute top-16 right-[8%] opacity-30">
             <svg width="72" height="72" viewBox="0 0 72 72" fill="none">
               <circle cx="36" cy="36" r="34" fill="url(#heroball1)" />
               <path d="M20 20 Q36 30 52 20" stroke="white" strokeWidth="2.5" strokeLinecap="round" fill="none"/>
@@ -73,17 +80,17 @@ export default function Home() {
           <motion.div
             animate={{ y: [0, 14, 0], rotate: [-15, -5, -15] }}
             transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }}
-            className="absolute top-24 left-[6%] opacity-15">
+            className="absolute top-24 left-[6%] opacity-25">
             <svg width="28" height="80" viewBox="0 0 28 80" fill="none">
               <rect x="6" y="0" width="16" height="52" rx="8" fill="#D97706"/>
               <rect x="10" y="52" width="8" height="20" rx="4" fill="#92400E"/>
             </svg>
           </motion.div>
-          {/* Small spinning ball bottom right */}
+          {/* Small spinning ball */}
           <motion.div
             animate={{ y: [0, -10, 0], rotate: [0, -360] }}
             transition={{ y: { repeat: Infinity, duration: 3.5, ease: 'easeInOut' }, rotate: { repeat: Infinity, duration: 6, ease: 'linear' } }}
-            className="absolute bottom-32 left-[12%] opacity-15">
+            className="absolute bottom-32 left-[12%] opacity-20">
             <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
               <circle cx="22" cy="22" r="20" fill="url(#heroball2)" />
               <path d="M12 12 Q22 18 32 12" stroke="white" strokeWidth="2" strokeLinecap="round" fill="none"/>
@@ -96,17 +103,17 @@ export default function Home() {
               </defs>
             </svg>
           </motion.div>
-          {/* Wicket stumps top left */}
+          {/* Wicket stumps */}
           <motion.div
-            animate={{ opacity: [0.1, 0.2, 0.1] }}
+            animate={{ opacity: [0.15, 0.3, 0.15] }}
             transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
-            className="absolute top-10 left-[20%] opacity-10">
+            className="absolute top-10 left-[20%]">
             <svg width="36" height="60" viewBox="0 0 36 60" fill="none">
-              <rect x="2" y="10" width="5" height="44" rx="2.5" fill="#2E7D32"/>
-              <rect x="15.5" y="10" width="5" height="44" rx="2.5" fill="#2E7D32"/>
-              <rect x="29" y="10" width="5" height="44" rx="2.5" fill="#2E7D32"/>
-              <rect x="0" y="6" width="16" height="6" rx="3" fill="#388E3C"/>
-              <rect x="20" y="6" width="16" height="6" rx="3" fill="#388E3C"/>
+              <rect x="2" y="10" width="5" height="44" rx="2.5" fill="#4CAF50"/>
+              <rect x="15.5" y="10" width="5" height="44" rx="2.5" fill="#4CAF50"/>
+              <rect x="29" y="10" width="5" height="44" rx="2.5" fill="#4CAF50"/>
+              <rect x="0" y="6" width="16" height="6" rx="3" fill="#66BB6A"/>
+              <rect x="20" y="6" width="16" height="6" rx="3" fill="#66BB6A"/>
             </svg>
           </motion.div>
         </div>
@@ -126,54 +133,54 @@ export default function Home() {
             {/* Headline */}
             <motion.div variants={fadeUp}>
               <h1 className="text-5xl sm:text-6xl md:text-7xl font-black leading-[1.0] tracking-tight">
-                <span className="text-ink-900">Find Your</span>
+                <span className="text-white">Find Your</span>
                 <br />
                 <span className="relative inline-block">
-                  <span className="bg-gradient-to-r from-pitch-600 via-pitch-700 to-pitch-800 bg-clip-text text-transparent">
+                  <span className="bg-gradient-to-r from-pitch-400 via-pitch-300 to-pitch-400 bg-clip-text text-transparent">
                     Cricket Turf
                   </span>
                   <svg className="absolute -bottom-2 left-0 w-full" height="8" viewBox="0 0 300 8" fill="none">
-                    <path d="M0 6 Q75 0 150 4 Q225 8 300 2" stroke="#2E7D32" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.5"/>
+                    <path d="M0 6 Q75 0 150 4 Q225 8 300 2" stroke="#66BB6A" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.7"/>
                   </svg>
                 </span>
                 <br />
-                <span className="text-ink-600">Book It Now.</span>
+                <span className="text-white/80">Book It Now.</span>
               </h1>
             </motion.div>
 
-            <motion.p variants={fadeUp} className="text-lg md:text-xl text-ink-500 max-w-xl mx-auto leading-relaxed">
+            <motion.p variants={fadeUp} className="text-lg md:text-xl text-white/70 max-w-xl mx-auto leading-relaxed">
               Discover verified box cricket turfs near you and book your slot instantly — no calls, no hassle.
             </motion.p>
 
             {/* Trust pills */}
             <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-2.5">
               {['Real-time availability', 'Instant confirmation', 'No advance payment'].map(t => (
-                <span key={t} className="flex items-center gap-1.5 text-sm text-pitch-700 px-4 py-2 rounded-full bg-pitch-50 border border-pitch-200 font-semibold shadow-sm">
-                  <FiCheck className="text-pitch-600 text-xs" /> {t}
+                <span key={t} className="flex items-center gap-1.5 text-sm text-white px-4 py-2 rounded-full bg-white/10 border border-white/25 font-semibold backdrop-blur-sm">
+                  <FiCheck className="text-pitch-400 text-xs" /> {t}
                 </span>
               ))}
             </motion.div>
 
             {/* Search bar */}
             <motion.form variants={fadeUp} onSubmit={handleSearch} className="max-w-2xl mx-auto">
-              <div className="flex flex-col sm:flex-row gap-2 p-2.5 rounded-2xl bg-white border-2 border-ink-200 shadow-2xl shadow-black/10 hover:border-pitch-300 transition-colors duration-300">
-                <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl bg-ink-50 hover:bg-ink-100 transition-colors">
-                  <FiSearch className="text-ink-400 flex-shrink-0 text-base" />
+              <div className="flex flex-col sm:flex-row gap-2 p-2.5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 shadow-2xl">
+                <div className="flex-1 flex items-center gap-3 px-4 py-3 rounded-xl bg-white/15">
+                  <FiSearch className="text-white/60 flex-shrink-0 text-base" />
                   <input
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                     placeholder="Search turf name or area..."
-                    className="bg-transparent flex-1 outline-none text-sm text-ink-900 placeholder-ink-400 font-medium"
+                    className="bg-transparent flex-1 outline-none text-sm text-white placeholder-white/50 font-medium"
                   />
                 </div>
-                <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-ink-50 hover:bg-ink-100 transition-colors sm:w-44">
-                  <FiMapPin className="text-pitch-600 flex-shrink-0 text-sm" />
+                <div className="flex items-center gap-2 px-4 py-3 rounded-xl bg-white/15 sm:w-44">
+                  <FiMapPin className="text-pitch-400 flex-shrink-0 text-sm" />
                   <select
                     value={city}
                     onChange={e => setCity(e.target.value)}
-                    className="bg-transparent flex-1 outline-none text-sm text-ink-800 appearance-none cursor-pointer font-medium">
-                    <option value="">All Cities</option>
-                    {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+                    className="bg-transparent flex-1 outline-none text-sm text-white appearance-none cursor-pointer font-medium">
+                    <option value="" className="text-ink-900 bg-white">All Cities</option>
+                    {CITIES.map(c => <option key={c} value={c} className="text-ink-900 bg-white">{c}</option>)}
                   </select>
                 </div>
                 <button type="submit"
@@ -187,7 +194,7 @@ export default function Home() {
             <motion.div variants={fadeUp} className="flex flex-wrap justify-center gap-2 pb-2">
               {CITIES.slice(0, 8).map(c => (
                 <button key={c} onClick={() => navigate(`/turfs?city=${c}`)}
-                  className="text-xs text-ink-600 px-4 py-2 rounded-full bg-white border border-ink-200 hover:bg-pitch-700 hover:text-white hover:border-pitch-700 transition-all duration-200 font-semibold shadow-sm">
+                  className="text-xs text-white/80 px-4 py-2 rounded-full bg-white/10 border border-white/20 hover:bg-pitch-700 hover:text-white hover:border-pitch-600 transition-all duration-200 font-semibold backdrop-blur-sm">
                   {c}
                 </button>
               ))}
@@ -199,9 +206,9 @@ export default function Home() {
         <motion.div
           animate={{ y: [0, 8, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
-          className="relative z-10 flex flex-col items-center gap-2 text-ink-400 text-xs mt-10 pb-10">
-          <div className="w-5 h-8 rounded-full border-2 border-ink-300 flex justify-center pt-1.5">
-            <div className="w-1 h-2 bg-pitch-600 rounded-full" />
+          className="relative z-10 flex flex-col items-center gap-2 text-white/50 text-xs mt-10 pb-10">
+          <div className="w-5 h-8 rounded-full border-2 border-white/30 flex justify-center pt-1.5">
+            <div className="w-1 h-2 bg-pitch-400 rounded-full" />
           </div>
           <span>Scroll</span>
         </motion.div>
@@ -214,7 +221,7 @@ export default function Home() {
             className="text-center mb-16">
             <motion.div variants={fadeUp}>
               <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-pitch-100 text-pitch-700 border border-pitch-200 mb-4 tracking-wider uppercase">
-                Why BoxBook
+                Why PitchUp
               </span>
             </motion.div>
             <motion.h2 variants={fadeUp} className="text-4xl md:text-5xl font-black tracking-tight text-ink-900 mb-3">
@@ -298,7 +305,7 @@ export default function Home() {
                 </span>
                 <h2 className="text-4xl font-black tracking-tight text-ink-900">
                   Turfs near you,<br />
-                  <span className="text-pitch-700">not yet on BoxBook</span>
+                  <span className="text-pitch-700">not yet on PitchUp</span>
                 </h2>
                 <p className="text-ink-500 mt-2 max-w-md">Real cricket venues across India. Contact them directly or invite them to join.</p>
               </div>
@@ -317,7 +324,7 @@ export default function Home() {
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
                     <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold bg-amber-500 text-white shadow-md">
-                      Not on BoxBook
+                      Not on PitchUp
                     </div>
                     <div className="absolute top-3 right-3 flex items-center gap-1 px-2.5 py-1 rounded-full text-xs bg-white/95 text-ink-800 font-bold shadow-md">
                       <FiStar className="text-amber-500 text-xs" /> {t.rating}
@@ -408,7 +415,7 @@ export default function Home() {
               {[
                 { icon: FiPhone, title: 'Call Us', value: '+91 98765 43210', sub: 'Mon–Sat, 9am–8pm', href: 'tel:+919876543210', gradient: 'from-blue-500 to-blue-700', light: 'bg-blue-50', border: 'border-blue-100' },
                 { icon: FiMessageCircle, title: 'WhatsApp', value: '+91 98765 43210', sub: 'Quick replies guaranteed', href: 'https://wa.me/919876543210', gradient: 'from-pitch-500 to-pitch-700', light: 'bg-pitch-50', border: 'border-pitch-100' },
-                { icon: FiMail, title: 'Email Us', value: 'support@boxbook.in', sub: 'Reply within 24 hours', href: 'mailto:support@boxbook.in', gradient: 'from-purple-500 to-purple-700', light: 'bg-purple-50', border: 'border-purple-100' },
+                { icon: FiMail, title: 'Email Us', value: 'support@pitchup.in', sub: 'Reply within 24 hours', href: 'mailto:support@pitchup.in', gradient: 'from-purple-500 to-purple-700', light: 'bg-purple-50', border: 'border-purple-100' },
               ].map((c, i) => (
                 <motion.a key={i} variants={fadeUp} href={c.href} target="_blank" rel="noreferrer"
                   className={`group rounded-2xl p-6 text-center border-2 ${c.border} ${c.light} hover:shadow-xl hover:-translate-y-1 transition-all duration-300 block`}>
