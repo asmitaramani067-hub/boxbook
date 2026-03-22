@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiMapPin, FiArrowRight, FiZap, FiShield, FiStar,
-  FiPhone, FiMail, FiMessageCircle, FiCheck, FiTrendingUp
+  FiPhone, FiMail, FiMessageCircle, FiCheck, FiTrendingUp, FiChevronDown
 } from 'react-icons/fi';
 import { fadeUp, staggerContainer, scaleIn } from '../animations/variants';
 import { CITIES } from '../constants';
@@ -11,13 +11,23 @@ export { CITIES };
 
 const PREVIEW_TURFS = EXPLORE_TURFS.slice(0, 3);
 const PREVIEW_IMGS = [
-  'https://lh3.googleusercontent.com/gps-cs-s/AHVAweqqlp3D822p-bsCb-pHWsYyBzGlpJKOVgTuYs6QVGwbifdkXYRFWCtvXqT9K2PkYfboRxVpUufwl2Ac6C1uTOdZd1d2PU8pBMkuCUt0E5vS98c2ZCjch0yNiApJ7vPLj1pbosfGwOmJwLie=s680-w680-h510-rw',
-  'https://lh3.googleusercontent.com/gps-cs-s/AHVAweojq9dVG9iIHItiyPNNk9M9kSFwJtHksIXQGn1LKhWpIy3RK1bxKL1KB1PUVEXeYoQNlw96hxZBpHk_y7GCr4ldYG1AQbWXdVT6ER_uYcoiqda8z50TgJjkMba-UOI1jsor7COYBw=w141-h235-n-k-no-nu',
-  'https://lh3.googleusercontent.com/p/AF1QipPcA45J2t8NeSviF6X3cCHzf797XxjefeBjSAmq=w243-h174-n-k-no-nu',
+  'https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=600&q=80',
+  'https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=600&q=80',
+  'https://images.unsplash.com/photo-1624880357913-a8539238245b?w=600&q=80',
 ];
 
-// Box cricket turf background — green artificial turf with net enclosure feel
-const HERO_BG = 'https://images.unsplash.com/photo-1593766788306-28561086694e?w=1600&q=90';
+import heroBg from '../assets/hero.jpg';
+// Box cricket turf background
+const HERO_BG = heroBg;
+
+const FAQS = [
+  { q: 'How do I book a turf on PitchUp?', a: 'Simply search for a turf by name or city, pick your preferred date and time slot, and confirm your booking. No calls needed — the whole process takes under 60 seconds.' },
+  { q: 'Is there any advance payment required?', a: 'No advance payment is required to book a slot. You pay directly at the turf when you arrive.' },
+  { q: 'Can I cancel or reschedule my booking?', a: 'Yes, you can cancel or reschedule your booking from the "My Bookings" section. Please check the turf\'s cancellation policy before booking.' },
+  { q: 'How do I list my turf on PitchUp?', a: 'Register as a Turf Owner, fill in your turf details, upload photos, and set your pricing. Your listing goes live immediately after submission.' },
+  { q: 'Are the turfs verified?', a: 'Yes, every turf listed on PitchUp is physically verified by our team for quality, safety, and accuracy of information.' },
+  { q: 'Which cities are currently supported?', a: 'We currently support Mumbai, Delhi, Bangalore, Hyderabad, Chennai, Pune, Ahmedabad, and Surat — with more cities being added regularly.' },
+];
 
 const FEATURES = [
   { icon: FiZap, title: 'Instant Booking', desc: 'Reserve your slot in under 60 seconds. No calls, no waiting.', gradient: 'from-amber-400 to-orange-500', light: 'bg-amber-50', border: 'border-amber-100' },
@@ -35,6 +45,7 @@ const STEPS = [
 export default function Home() {
   const [search, setSearch] = useState('');
   const [city, setCity] = useState('');
+  const [faqOpen, setFaqOpen] = useState(null);
   const navigate = useNavigate();
 
   const handleSearch = (e) => {
@@ -52,7 +63,7 @@ export default function Home() {
       <section className="relative flex flex-col items-center justify-center overflow-hidden pt-24 pb-0">
         {/* Background image with overlay */}
         <div className="absolute inset-0">
-          <img src={HERO_BG} alt="Cricket turf" className="w-full h-full object-cover object-center" />
+          <img src={HERO_BG} alt="Cricket turf" className="w-full h-full object-cover object-center scale-105" />
           <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/75" />
           <div className="absolute inset-0 bg-pitch-900/20" />
         </div>
@@ -253,8 +264,12 @@ export default function Home() {
       <section className="py-24 px-4 bg-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.03]"
           style={{ backgroundImage: 'radial-gradient(circle, #2E7D32 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+        {/* Ambient glow blobs */}
+        <div className="absolute top-10 left-1/4 w-72 h-72 rounded-full opacity-[0.06] blur-3xl bg-pitch-500 pointer-events-none" />
+        <div className="absolute bottom-10 right-1/4 w-72 h-72 rounded-full opacity-[0.06] blur-3xl bg-blue-500 pointer-events-none" />
+
         <div className="max-w-5xl mx-auto relative z-10">
-          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}>
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.2 }} variants={staggerContainer}>
             <motion.div variants={fadeUp} className="text-center mb-16">
               <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-pitch-100 text-pitch-700 border border-pitch-200 mb-4 tracking-wider uppercase">
                 How It Works
@@ -265,26 +280,60 @@ export default function Home() {
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-              {/* Connector line */}
-              <div className="hidden md:block absolute top-12 left-[calc(33%+2rem)] right-[calc(33%+2rem)] h-0.5 bg-gradient-to-r from-pitch-300 to-pitch-300" style={{ backgroundImage: 'repeating-linear-gradient(90deg, #A5D6A7 0, #A5D6A7 8px, transparent 8px, transparent 16px)' }} />
+              {/* Animated connector line */}
+              <motion.div
+                initial={{ scaleX: 0 }}
+                whileInView={{ scaleX: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 1, delay: 0.6, ease: 'easeInOut' }}
+                className="hidden md:block absolute top-12 left-[calc(33%+2rem)] right-[calc(33%+2rem)] h-0.5 origin-left"
+                style={{ backgroundImage: 'repeating-linear-gradient(90deg, #4CAF50 0, #4CAF50 8px, transparent 8px, transparent 16px)' }}
+              />
 
               {STEPS.map((s, i) => (
-                <motion.div key={i} variants={fadeUp} className="flex flex-col items-center text-center group">
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 40 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.55, delay: i * 0.18, ease: 'easeOut' }}
+                  whileHover={{ y: -6 }}
+                  className="flex flex-col items-center text-center group cursor-default">
                   <div className="relative mb-6">
-                    <div className={`w-24 h-24 rounded-3xl bg-gradient-to-br ${s.color} flex items-center justify-center shadow-xl group-hover:shadow-2xl group-hover:scale-105 transition-all duration-300`}>
+                    {/* Pulse ring */}
+                    <motion.div
+                      animate={{ scale: [1, 1.25, 1], opacity: [0.4, 0, 0.4] }}
+                      transition={{ repeat: Infinity, duration: 2.5, delay: i * 0.4, ease: 'easeInOut' }}
+                      className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${s.color} opacity-30`}
+                    />
+                    <motion.div
+                      whileHover={{ scale: 1.1, rotate: [0, -4, 4, 0] }}
+                      transition={{ duration: 0.4 }}
+                      className={`relative w-24 h-24 rounded-3xl bg-gradient-to-br ${s.color} flex items-center justify-center shadow-xl group-hover:shadow-2xl transition-shadow duration-300`}>
                       <span className="text-4xl">{s.emoji}</span>
-                    </div>
-                    <div className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white border-2 border-pitch-200 flex items-center justify-center shadow-md">
+                    </motion.div>
+                    {/* Step number badge */}
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      whileInView={{ scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ type: 'spring', stiffness: 300, delay: 0.3 + i * 0.18 }}
+                      className="absolute -top-3 -right-3 w-8 h-8 rounded-full bg-white border-2 border-pitch-300 flex items-center justify-center shadow-md">
                       <span className="text-pitch-700 text-sm font-black">{i + 1}</span>
-                    </div>
+                    </motion.div>
                   </div>
-                  <h3 className="font-black text-xl mb-2 text-ink-900">{s.title}</h3>
+                  <h3 className="font-black text-xl mb-2 text-ink-900 group-hover:text-pitch-700 transition-colors duration-200">{s.title}</h3>
                   <p className="text-sm text-ink-500 leading-relaxed max-w-xs">{s.desc}</p>
                 </motion.div>
               ))}
             </div>
 
-            <motion.div variants={fadeUp} className="text-center mt-12">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.7 }}
+              className="text-center mt-12">
               <button onClick={() => navigate('/turfs')}
                 className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl font-bold text-base bg-gradient-to-r from-pitch-700 to-pitch-600 text-white hover:from-pitch-800 hover:to-pitch-700 transition-all duration-200 shadow-xl shadow-pitch-700/30 hover:shadow-2xl hover:-translate-y-0.5 active:scale-95">
                 Start Booking Now <FiArrowRight />
@@ -396,6 +445,55 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* ── FAQ ── */}
+      {/* <section className="py-24 px-4 bg-ink-50">
+        <div className="max-w-3xl mx-auto">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={staggerContainer}>
+            <motion.div variants={fadeUp} className="text-center mb-14">
+              <span className="inline-block px-4 py-1.5 rounded-full text-xs font-bold bg-pitch-100 text-pitch-700 border border-pitch-200 mb-4 tracking-wider uppercase">
+                FAQ
+              </span>
+              <h2 className="text-4xl md:text-5xl font-black tracking-tight text-ink-900 mb-3">
+                Got <span className="text-pitch-700">Questions?</span>
+              </h2>
+              <p className="text-ink-500 text-lg">Everything you need to know about finding and booking turfs on PitchUp.</p>
+            </motion.div>
+
+            <div className="space-y-3">
+              {FAQS.map((faq, i) => (
+                <motion.div key={i} variants={fadeUp}
+                  className="rounded-2xl border border-ink-200 bg-white overflow-hidden shadow-sm">
+                  <button
+                    onClick={() => setFaqOpen(faqOpen === i ? null : i)}
+                    className="w-full flex items-center justify-between gap-4 px-6 py-5 text-left hover:bg-ink-50 transition-colors">
+                    <span className="font-semibold text-ink-900 text-sm md:text-base">{faq.q}</span>
+                    <motion.div
+                      animate={{ rotate: faqOpen === i ? 180 : 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex-shrink-0">
+                      <FiChevronDown className={`text-lg transition-colors ${faqOpen === i ? 'text-pitch-700' : 'text-ink-400'}`} />
+                    </motion.div>
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {faqOpen === i && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25, ease: 'easeInOut' }}>
+                        <div className="px-6 pb-5 text-sm text-ink-500 leading-relaxed border-t border-ink-100 pt-4">
+                          {faq.a}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section> */}
 
       {/* ── CONTACT ── */}
       <section id="contact" className="py-24 px-4 bg-white">

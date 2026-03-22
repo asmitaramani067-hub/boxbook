@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext';
+import InstallBanner from './components/InstallBanner';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -76,6 +77,7 @@ export default function App() {
             </Routes>
           </AnimatePresence>
           <Footer />
+          <InstallBanner />
           <Toaster position="top-right" toastOptions={{
             style: { background: '#fff', color: '#111827', border: '1px solid #E5E7EB', boxShadow: '0 4px 20px rgba(0,0,0,0.08)' },
             success: { iconTheme: { primary: '#2E7D32', secondary: '#fff' } },
