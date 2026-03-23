@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import {
+import { motion, AnimatePresence } from 'framer-motion';import {
   FiLogOut, FiGrid, FiCalendar, FiPlusCircle,
   FiChevronDown, FiCompass, FiPhone, FiBell, FiUsers, FiHome, FiUser, FiSearch
 } from 'react-icons/fi';
@@ -9,16 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { subscribeToPush } from '../utils/pushSubscribe';
 
-// Page title map for mobile header
-const PAGE_TITLES = {
-  '/':               { title: 'PitchUp', sub: 'Book · Play · Connect' },
-  '/turfs':          { title: 'Find Turfs', sub: 'Book a ground near you' },
-  '/explore':        { title: 'Explore', sub: 'Discover top grounds' },
-  '/matches':        { title: 'Find Players', sub: 'Cricket matches near you' },
-  '/bookings':       { title: 'My Bookings', sub: 'Your upcoming slots' },
-  '/owner/dashboard':{ title: 'Dashboard', sub: 'Manage your turfs' },
-  '/owner/add-turf': { title: 'Add Turf', sub: 'List a new ground' },
-};
+// Page title map removed — mobile header now shows logo + wordmark
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -32,10 +22,6 @@ export default function Navbar() {
   const dropRef = useRef(null);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
-
-  // Current page info for mobile header
-  const pageKey = Object.keys(PAGE_TITLES).find(k => k !== '/' && location.pathname.startsWith(k)) || '/';
-  const pageInfo = PAGE_TITLES[pageKey] || PAGE_TITLES['/'];
 
   useEffect(() => {
     if (user?.role === 'owner') {
@@ -247,17 +233,47 @@ export default function Navbar() {
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-pitch-800 shadow-md">
         <div className="flex items-center justify-between px-4 h-14 gap-3">
 
-          {/* Left: page title + subtitle */}
-          <div className="flex-1 min-w-0">
-            <AnimatePresence mode="wait">
-              <motion.div key={location.pathname}
-                initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.18 }}>
-                <p className="text-white font-black text-base leading-tight truncate">{pageInfo.title}</p>
-                <p className="text-pitch-300 text-[11px] leading-tight truncate">{pageInfo.sub}</p>
-              </motion.div>
-            </AnimatePresence>
-          </div>
+          {/* Left: Logo icon + wordmark */}
+          <Link to="/" className="flex items-center gap-2 flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center shadow-sm">
+              <svg width="32" height="32" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <polygon points="180,420 332,420 290,180 222,180" fill="#2E7D32"/>
+                <line x1="210" y1="230" x2="302" y2="230" stroke="white" strokeWidth="6" strokeLinecap="round" opacity="0.9"/>
+                <line x1="196" y1="380" x2="316" y2="380" stroke="white" strokeWidth="6" strokeLinecap="round" opacity="0.9"/>
+                <rect x="238" y="188" width="10" height="52" rx="5" fill="white"/>
+                <rect x="251" y="188" width="10" height="52" rx="5" fill="white"/>
+                <rect x="264" y="188" width="10" height="52" rx="5" fill="white"/>
+                <rect x="235" y="186" width="18" height="6" rx="3" fill="#FCD34D"/>
+                <rect x="259" y="186" width="18" height="6" rx="3" fill="#FCD34D"/>
+                <polygon points="60,440 180,420 222,180 130,100" fill="#388E3C"/>
+                <polygon points="452,440 332,420 290,180 382,100" fill="#388E3C"/>
+                <rect x="108" y="72" width="52" height="310" rx="26" fill="#2E7D32"/>
+                <rect x="122" y="370" width="24" height="72" rx="12" fill="#1B5E20"/>
+                <rect x="108" y="72" width="14" height="310" rx="7" fill="#4CAF50" opacity="0.5"/>
+                <ellipse cx="260" cy="195" rx="90" ry="18" fill="url(#mnt)" transform="rotate(-38 260 195)" opacity="0.7"/>
+                <circle cx="360" cy="108" r="58" fill="url(#mnb)"/>
+                <ellipse cx="342" cy="90" rx="16" ry="10" fill="white" opacity="0.3" transform="rotate(-30 342 90)"/>
+                <path d="M330 88 Q348 108 330 128" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.6"/>
+                <path d="M390 88 Q372 108 390 128" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.6"/>
+                <defs>
+                  <linearGradient id="mnt" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="white" stopOpacity="0"/>
+                    <stop offset="100%" stopColor="#A5D6A7" stopOpacity="0.9"/>
+                  </linearGradient>
+                  <radialGradient id="mnb" cx="38%" cy="35%" r="62%">
+                    <stop offset="0%" stopColor="#FF7043"/>
+                    <stop offset="100%" stopColor="#B71C1C"/>
+                  </radialGradient>
+                </defs>
+              </svg>
+            </div>
+            <div>
+              <p className="text-white font-black text-base leading-tight">
+                Pitch<span className="text-[#86EFAC]">Up</span>
+              </p>
+              <p className="text-white/50 text-[10px] leading-tight">Book · Play · Connect</p>
+            </div>
+          </Link>
 
           {/* Right: search + bell + avatar */}
           <div className="flex items-center gap-1 flex-shrink-0">
