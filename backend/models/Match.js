@@ -9,7 +9,7 @@ const matchSchema = new mongoose.Schema({
   time: { type: String, required: true },                    // "HH:MM" (24h)
   matchType: {
     type: String,
-    enum: ['Box Cricket', 'Open Ground', 'Tape Ball', 'Tennis Ball', 'Hard Ball'],
+    enum: ['Box Cricket', 'Open Ground'],
     default: 'Box Cricket',
   },
   sport: { type: String, default: 'Cricket', enum: ['Cricket'] },

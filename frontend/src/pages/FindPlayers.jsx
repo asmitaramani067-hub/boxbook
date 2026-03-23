@@ -7,7 +7,7 @@ import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 // ── Constants ─────────────────────────────────────────────────────────────
-const MATCH_TYPES = ['Box Cricket', 'Open Ground', 'Tape Ball', 'Tennis Ball', 'Hard Ball'];
+const MATCH_TYPES = ['Box Cricket', 'Open Ground'];
 const TYPE_COLORS = {
   'Box Cricket':   { bg: '#E8F5E9', text: '#2E7D32', border: '#A5D6A7' },
   'Open Ground':   { bg: '#E3F2FD', text: '#1565C0', border: '#90CAF9' },
