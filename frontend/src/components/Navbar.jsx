@@ -230,48 +230,31 @@ export default function Navbar() {
           MOBILE top header (< lg)
           Full-width, green bg, page title + avatar
       ════════════════════════════════════════ */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-pitch-800 shadow-md">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-ink-100 shadow-sm">
         <div className="flex items-center justify-between px-4 h-14 gap-3">
 
           {/* Left: Logo icon + wordmark */}
           <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-            <div className="w-8 h-8 rounded-lg overflow-hidden bg-white flex items-center justify-center shadow-sm">
-              <svg width="32" height="32" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <polygon points="180,420 332,420 290,180 222,180" fill="#2E7D32"/>
-                <line x1="210" y1="230" x2="302" y2="230" stroke="white" strokeWidth="6" strokeLinecap="round" opacity="0.9"/>
-                <line x1="196" y1="380" x2="316" y2="380" stroke="white" strokeWidth="6" strokeLinecap="round" opacity="0.9"/>
-                <rect x="238" y="188" width="10" height="52" rx="5" fill="white"/>
-                <rect x="251" y="188" width="10" height="52" rx="5" fill="white"/>
-                <rect x="264" y="188" width="10" height="52" rx="5" fill="white"/>
-                <rect x="235" y="186" width="18" height="6" rx="3" fill="#FCD34D"/>
-                <rect x="259" y="186" width="18" height="6" rx="3" fill="#FCD34D"/>
-                <polygon points="60,440 180,420 222,180 130,100" fill="#388E3C"/>
-                <polygon points="452,440 332,420 290,180 382,100" fill="#388E3C"/>
-                <rect x="108" y="72" width="52" height="310" rx="26" fill="#2E7D32"/>
-                <rect x="122" y="370" width="24" height="72" rx="12" fill="#1B5E20"/>
-                <rect x="108" y="72" width="14" height="310" rx="7" fill="#4CAF50" opacity="0.5"/>
-                <ellipse cx="260" cy="195" rx="90" ry="18" fill="url(#mnt)" transform="rotate(-38 260 195)" opacity="0.7"/>
-                <circle cx="360" cy="108" r="58" fill="url(#mnb)"/>
-                <ellipse cx="342" cy="90" rx="16" ry="10" fill="white" opacity="0.3" transform="rotate(-30 342 90)"/>
-                <path d="M330 88 Q348 108 330 128" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.6"/>
-                <path d="M390 88 Q372 108 390 128" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.6"/>
+            <div className="w-9 h-9 flex items-center justify-center">
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+                <circle cx="18" cy="18" r="16" fill="url(#mballGrad)" />
+                <path d="M10 10 Q18 16 26 10" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.7"/>
+                <path d="M10 26 Q18 20 26 26" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.7"/>
+                <rect x="22" y="4" width="5" height="14" rx="2.5" fill="#D97706" />
+                <rect x="23.5" y="17" width="2" height="5" rx="1" fill="#92400E" />
                 <defs>
-                  <linearGradient id="mnt" x1="0%" y1="0%" x2="100%" y2="0%">
-                    <stop offset="0%" stopColor="white" stopOpacity="0"/>
-                    <stop offset="100%" stopColor="#A5D6A7" stopOpacity="0.9"/>
-                  </linearGradient>
-                  <radialGradient id="mnb" cx="38%" cy="35%" r="62%">
-                    <stop offset="0%" stopColor="#FF7043"/>
-                    <stop offset="100%" stopColor="#B71C1C"/>
+                  <radialGradient id="mballGrad" cx="35%" cy="30%" r="65%">
+                    <stop offset="0%" stopColor="#4CAF50" />
+                    <stop offset="100%" stopColor="#1B5E20" />
                   </radialGradient>
                 </defs>
               </svg>
             </div>
             <div>
-              <p className="text-white font-black text-base leading-tight">
-                Pitch<span className="text-[#86EFAC]">Up</span>
+              <p className="text-ink-900 font-black text-base leading-tight">
+                Pitch<span className="text-pitch-700">Up</span>
               </p>
-              <p className="text-white/50 text-[10px] leading-tight">Book · Play · Connect</p>
+              <p className="text-ink-400 text-[10px] leading-tight">Book · Play · Connect</p>
             </div>
           </Link>
 
@@ -279,7 +262,7 @@ export default function Navbar() {
           <div className="flex items-center gap-1 flex-shrink-0">
             {/* Quick search shortcut */}
             <button onClick={() => navigate('/turfs')}
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors">
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-ink-500 hover:text-pitch-700 hover:bg-ink-100 transition-colors">
               <FiSearch className="text-lg" />
             </button>
 
@@ -287,7 +270,7 @@ export default function Navbar() {
             {user?.role === 'owner' && (
               <div className="relative" ref={bellRef}>
                 <button onClick={() => { setBellOpen(o => !o); if (!bellOpen) markAllRead(); }}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-white/70 hover:text-white hover:bg-white/10 transition-colors relative">
+                  className="w-9 h-9 rounded-xl flex items-center justify-center text-ink-500 hover:text-pitch-700 hover:bg-ink-100 transition-colors relative">
                   <FiBell className="text-lg" />
                   {unreadCount > 0 && (
                     <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
@@ -322,13 +305,13 @@ export default function Navbar() {
 
             {/* Avatar / login */}
             {user ? (
-              <div className="w-9 h-9 rounded-xl bg-white/20 border border-white/30 flex items-center justify-center flex-shrink-0 cursor-pointer"
+              <div className="w-9 h-9 rounded-xl bg-pitch-700 flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-pitch-800 transition-colors"
                 onClick={handleLogout} title="Tap to sign out">
                 <span className="text-white text-sm font-black">{user.name?.charAt(0).toUpperCase() || 'U'}</span>
               </div>
             ) : (
               <Link to="/login"
-                className="px-3 py-1.5 rounded-xl bg-white text-pitch-800 text-xs font-black hover:bg-pitch-50 transition-colors shadow-sm">
+                className="px-3 py-1.5 rounded-xl bg-pitch-700 text-white text-xs font-black hover:bg-pitch-800 transition-colors shadow-sm">
                 Login
               </Link>
             )}
