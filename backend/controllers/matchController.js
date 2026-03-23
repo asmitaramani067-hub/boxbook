@@ -9,6 +9,20 @@ exports.getMatches = async (req, res) => {
     if (date) filter.date = date;
     if (status) filter.status = status;
 
+    // Auto-expire past open matches
+    const today = new Date().toISOString().split('T')[0];
+    const nowTime = new Date().toTimeString().slice(0, 5);
+    await Match.updateMany(
+      {
+        status: 'open',
+        $or: [
+          { date: { $lt: today } },
+          { date: today, time: { $lt: nowTime } },
+        ],
+      },
+      { $set: { status: 'cancelled' } }
+    );
+
     const limit = 12;
     const skip = (Number(page) - 1) * limit;
 

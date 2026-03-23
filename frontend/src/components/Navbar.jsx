@@ -303,11 +303,39 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Avatar / login */}
+            {/* Avatar — opens mini dropdown, not direct logout */}
             {user ? (
-              <div className="w-9 h-9 rounded-xl bg-pitch-700 flex items-center justify-center flex-shrink-0 cursor-pointer hover:bg-pitch-800 transition-colors"
-                onClick={handleLogout} title="Tap to sign out">
-                <span className="text-white text-sm font-black">{user.name?.charAt(0).toUpperCase() || 'U'}</span>
+              <div className="relative" ref={dropRef}>
+                <button
+                  onClick={() => setDropOpen(d => !d)}
+                  className="w-9 h-9 rounded-xl bg-pitch-700 flex items-center justify-center flex-shrink-0 hover:bg-pitch-800 transition-colors">
+                  <span className="text-white text-sm font-black">{user.name?.charAt(0).toUpperCase() || 'U'}</span>
+                </button>
+                <AnimatePresence>
+                  {dropOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -8, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-48 rounded-2xl overflow-hidden bg-white border border-ink-200 shadow-2xl"
+                      style={{ zIndex: 9999 }}>
+                      <div className="px-4 py-3 bg-gradient-to-br from-pitch-700 to-pitch-900 flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                          <span className="text-white text-sm font-black">{user.name?.charAt(0).toUpperCase() || 'U'}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-sm font-bold text-white truncate">{user.name || 'User'}</p>
+                          <p className="text-[11px] text-pitch-300">{user.role === 'owner' ? 'Turf Owner' : 'Player'}</p>
+                        </div>
+                      </div>
+                      <button onClick={handleLogout}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors font-medium">
+                        <FiLogOut className="flex-shrink-0" /> Sign Out
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ) : (
               <Link to="/login"
@@ -332,7 +360,7 @@ export default function Navbar() {
                 style={{ minHeight: 56 }}>
                 {active && (
                   <motion.div layoutId="bottomTabIndicator"
-                    className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-pitch-700"
+                    className="absolute top-0 inset-x-0 mx-auto w-8 h-0.5 rounded-full bg-pitch-700"
                     transition={{ type: 'spring', stiffness: 500, damping: 35 }} />
                 )}
                 <tab.icon className={`text-xl transition-colors ${active ? 'text-pitch-700' : 'text-ink-400'}`} />

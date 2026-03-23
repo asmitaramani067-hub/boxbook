@@ -377,16 +377,25 @@ export default function FindPlayers() {
       if (tab === 'complete') params.status = 'full';
       if (cityFilter) params.city = cityFilter;
       const { data } = await api.get('/matches', { params });
-      // Sort: urgent (soonest) first
-      const sorted = [...data.matches].sort((a, b) => {
+      // Sort: urgent (soonest) first, filter out past matches from 'looking' tab
+      const now = Date.now();
+      const filtered = [...data.matches].filter(m => {
+        if (tab === 'looking') {
+          // hide past matches
+          try {
+            return new Date(`${m.date}T${m.time}`) > now;
+          } catch { return true; }
+        }
+        return true;
+      });
+      const sorted = filtered.sort((a, b) => {
         const ma = minutesUntil(a.date, a.time);
         const mb = minutesUntil(b.date, b.time);
         if (ma < 0 && mb >= 0) return 1;
         if (mb < 0 && ma >= 0) return -1;
         return ma - mb;
       });
-      setMatches(sorted);
-    } catch {
+      setMatches(sorted);    } catch {
       toast.error('Failed to load matches');
     } finally {
       setLoading(false);
