@@ -11,9 +11,6 @@ const MATCH_TYPES = ['Box Cricket', 'Open Ground', 'Tape Ball', 'Tennis Ball', '
 const TYPE_COLORS = {
   'Box Cricket':   { bg: '#E8F5E9', text: '#2E7D32', border: '#A5D6A7' },
   'Open Ground':   { bg: '#E3F2FD', text: '#1565C0', border: '#90CAF9' },
-  'Tape Ball':     { bg: '#FFF3E0', text: '#E65100', border: '#FFCC80' },
-  'Tennis Ball':   { bg: '#F3E5F5', text: '#6A1B9A', border: '#CE93D8' },
-  'Hard Ball':     { bg: '#FCE4EC', text: '#880E4F', border: '#F48FB1' },
 };
 
 // How urgent is this match? Returns minutes until match starts (negative = past)
