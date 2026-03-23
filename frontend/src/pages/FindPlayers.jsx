@@ -499,10 +499,10 @@ export default function FindPlayers() {
         </div>
 
         {/* ── Sticky filters ── */}
-        <div className="sticky top-16 z-30 bg-white border-b border-ink-100 shadow-sm">
-          <div className="max-w-5xl mx-auto px-4 py-3 flex gap-3 items-center">
-            {/* Search */}
-            <div className="relative flex-1 min-w-0">
+        <div className="sticky top-14 z-30 bg-white border-b border-ink-100 shadow-sm">
+          <div className="max-w-5xl mx-auto px-4 py-3 flex flex-col gap-2">
+            {/* Search row */}
+            <div className="relative">
               <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-400 text-sm pointer-events-none" />
               <input value={cityFilter} onChange={e => setCityFilter(e.target.value)}
                 placeholder="Search by city..."
@@ -514,11 +514,11 @@ export default function FindPlayers() {
                 </button>
               )}
             </div>
-            {/* Tabs */}
-            <div className="flex items-center gap-1 bg-ink-100 rounded-xl p-1 flex-shrink-0">
+            {/* Tabs row */}
+            <div className="flex items-center gap-1 bg-ink-100 rounded-xl p-1">
               {TABS.map(t => (
                 <button key={t.value} onClick={() => setTab(t.value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                     tab === t.value ? 'bg-white text-pitch-700 shadow-sm' : 'text-ink-500 hover:text-ink-800'
                   }`}>
                   {t.label}
