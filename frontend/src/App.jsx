@@ -38,7 +38,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <div className="min-h-screen bg-ink-50 text-ink-900 relative pb-14 lg:pb-0">
+        <div className="min-h-screen bg-ink-50 text-ink-900 relative pb-14 lg:pb-0 pt-14 lg:pt-0">
           <Navbar />
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
