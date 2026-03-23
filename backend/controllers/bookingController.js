@@ -5,6 +5,7 @@ const User = require('../models/User');
 const sendEmail = require('../utils/sendEmail');
 const Notification = require('../models/Notification');
 const webpush = require('web-push');
+const { acquireLock, releaseLock, isLockedByOther, getLocksForTurfDate, LOCK_TTL_MS } = require('../utils/slotLock');
 
 webpush.setVapidDetails(
   'mailto:' + (process.env.SMTP_USER || 'admin@pitchup.com'),
@@ -37,6 +38,11 @@ exports.createBooking = async (req, res) => {
     if (!freeBox)
       return res.status(400).json({ message: 'All boxes are booked for this slot. Please choose another time.' });
 
+    // Check slot lock — reject if another user has it locked
+    if (isLockedByOther(turfId, date, timeSlot, req.user._id)) {
+      return res.status(409).json({ message: 'This slot is temporarily held by another user. Please wait a moment and try again.' });
+    }
+
     const booking = await Booking.create({
       user: req.user._id,
       turf: turfId,
@@ -47,6 +53,9 @@ exports.createBooking = async (req, res) => {
       playerName: playerName || req.user.name,
       playerPhone: playerPhone || req.user.phone,
     });
+
+    // Release the slot lock now that booking is confirmed
+    releaseLock(turfId, date, timeSlot, req.user._id);
 
     await booking.populate([
       { path: 'turf', select: 'name location contactNumber owner' },
@@ -174,6 +183,83 @@ exports.getBookedSlots = async (req, res) => {
     });
 
     res.json(fullyBooked);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// GET /api/bookings/slots?turfId=&date=
+// Returns slots that are FULLY booked (all boxes taken) — used by TurfDetail slot picker
+exports.getBookedSlots = async (req, res) => {
+  try {
+    const { turfId, date } = req.query;
+
+    const boxes = await Box.find({ turf: turfId, isActive: true });
+    if (!boxes.length) return res.json([]);
+
+    const allSlots = [...new Set(boxes.flatMap(b => b.timeSlots))];
+
+    const bookings = await Booking.find({
+      turf: turfId,
+      date,
+      status: { $ne: 'cancelled' },
+    }).select('timeSlot box');
+
+    // A slot is "fully booked" only when every box that has that slot is taken
+    const fullyBooked = allSlots.filter(slot => {
+      const boxesWithSlot = boxes.filter(b => b.timeSlots.includes(slot));
+      const bookedCount = bookings.filter(b => b.timeSlot === slot).length;
+      return bookedCount >= boxesWithSlot.length;
+    });
+
+    res.json(fullyBooked);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// POST /api/bookings/lock  { turfId, date, timeSlot }
+// Acquires a 2-minute hold on a slot for the logged-in user.
+exports.lockSlot = async (req, res) => {
+  try {
+    const { turfId, date, timeSlot } = req.body;
+    if (!turfId || !date || !timeSlot)
+      return res.status(400).json({ message: 'turfId, date and timeSlot are required' });
+
+    const result = acquireLock(turfId, date, timeSlot, req.user._id);
+    if (!result.ok) {
+      return res.status(409).json({
+        message: 'Slot is temporarily held by another user',
+        expiresAt: result.expiresAt,
+      });
+    }
+    res.json({ locked: true, expiresAt: result.expiresAt, ttlMs: LOCK_TTL_MS });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// DELETE /api/bookings/lock  { turfId, date, timeSlot }
+// Releases a hold the logged-in user previously acquired.
+exports.unlockSlot = async (req, res) => {
+  try {
+    const { turfId, date, timeSlot } = req.body;
+    releaseLock(turfId, date, timeSlot, req.user._id);
+    res.json({ unlocked: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// GET /api/bookings/locks?turfId=&date=
+// Returns active locks for a turf+date so the UI can show countdown timers.
+// Only expiry timestamps are exposed — no user IDs.
+exports.getSlotLocks = async (req, res) => {
+  try {
+    const { turfId, date } = req.query;
+    if (!turfId || !date) return res.status(400).json({ message: 'turfId and date are required' });
+    const lockMap = getLocksForTurfDate(turfId, date);
+    res.json(lockMap); // { "10:00-11:00": 1712345678000, ... }
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

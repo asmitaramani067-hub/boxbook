@@ -25,6 +25,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/turfs', require('./routes/turfs'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/matches', require('./routes/matches'));
 app.use('/api', require('./routes/boxes'));
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok', message: 'BoxBook API running' }));

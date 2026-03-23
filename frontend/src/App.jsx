@@ -20,6 +20,8 @@ import OwnerDashboard from './pages/owner/Dashboard';
 import TurfForm from './pages/owner/TurfForm';
 import ExploreTurfs from './pages/ExploreTurfs';
 import ExploreTurfDetail from './pages/ExploreTurfDetail';
+import FindPlayers from './pages/FindPlayers';
+import MatchDetail from './pages/MatchDetail';
 
 function PageWrapper({ children }) {
   return (
@@ -36,7 +38,7 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <div className="min-h-screen bg-ink-50 text-ink-900 relative">
+        <div className="min-h-screen bg-ink-50 text-ink-900 relative pb-14 lg:pb-0">
           <Navbar />
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
@@ -49,6 +51,8 @@ export default function App() {
               <Route path="/turfs/:id" element={<PageWrapper><TurfDetail /></PageWrapper>} />
               <Route path="/explore" element={<PageWrapper><ExploreTurfs /></PageWrapper>} />
               <Route path="/explore/:id" element={<PageWrapper><ExploreTurfDetail /></PageWrapper>} />
+              <Route path="/matches" element={<PageWrapper><FindPlayers /></PageWrapper>} />
+              <Route path="/matches/:id" element={<PageWrapper><MatchDetail /></PageWrapper>} />
               <Route path="/bookings" element={
                 <ProtectedRoute role="player">
                   <PageWrapper><MyBookings /></PageWrapper>

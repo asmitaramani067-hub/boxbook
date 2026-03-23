@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMapPin, FiPhone, FiStar, FiClock, FiArrowLeft, FiMessageCircle, FiCheck, FiBox, FiCalendar } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiStar, FiClock, FiArrowLeft, FiMessageCircle, FiCheck, FiBox, FiCalendar, FiLock } from 'react-icons/fi';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import toast from 'react-hot-toast';
@@ -117,15 +117,71 @@ export default function TurfDetail() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedSlots, setSelectedSlots] = useState([]); // multi-select
   const [availability, setAvailability] = useState({}); // slot -> { total, booked, available }
+  const [slotLocks, setSlotLocks] = useState({}); // slot -> expiresAt (ms) for slots locked by others
+  const [lockCounters, setLockCounters] = useState({}); // slot -> seconds remaining
   const [booking, setBooking] = useState(false);
   const [confirmedBooking, setConfirmedBooking] = useState(null); // show modal
   const [activeImg, setActiveImg] = useState(0);
   const [review, setReview] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
+  const lockPollRef = useRef(null);
+  const countdownRef = useRef(null);
 
   useEffect(() => { fetchTurf(); }, [id]);
   useEffect(() => { if (turf) { fetchBoxes(); } }, [turf]);
-  useEffect(() => { if (boxes.length) fetchAvailability(); }, [selectedDate, boxes]);
+
+  const fetchSlotLocks = useCallback(async () => {
+    if (!turf) return;
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    try {
+      const { data } = await api.get('/bookings/locks', { params: { turfId: id, date: dateStr } });
+      setSlotLocks(data);
+    } catch {
+      // non-critical — ignore
+    }
+  }, [id, turf, selectedDate]);
+
+  useEffect(() => {
+    if (boxes.length) {
+      fetchAvailability();
+      fetchSlotLocks();
+    }
+  }, [selectedDate, boxes]);
+
+  // Poll slot locks every 15 seconds
+  useEffect(() => {
+    if (!turf) return;
+    lockPollRef.current = setInterval(fetchSlotLocks, 15000);
+    return () => clearInterval(lockPollRef.current);
+  }, [turf, selectedDate, fetchSlotLocks]);
+
+  // Countdown ticker — updates every second
+  useEffect(() => {
+    countdownRef.current = setInterval(() => {
+      const now = Date.now();
+      setLockCounters(prev => {
+        const next = {};
+        for (const [slot, expiresAt] of Object.entries(slotLocks)) {
+          const secs = Math.max(0, Math.ceil((expiresAt - now) / 1000));
+          if (secs > 0) next[slot] = secs;
+        }
+        return next;
+      });
+    }, 1000);
+    return () => clearInterval(countdownRef.current);
+  }, [slotLocks]);
+
+  // Release all held locks when date changes or component unmounts
+  useEffect(() => {
+    return () => {
+      if (!user || !selectedSlots.length) return;
+      const dateStr = selectedDate.toISOString().split('T')[0];
+      selectedSlots.forEach(slot => {
+        api.delete('/bookings/lock', { data: { turfId: id, date: dateStr, timeSlot: slot } }).catch(() => {});
+      });
+    };
+  }, [selectedDate]);
+
   const fetchTurf = async () => {
     try {
       const { data } = await api.get(`/turfs/${id}`);
@@ -164,10 +220,32 @@ export default function TurfDetail() {
     }
   };
 
-  const toggleSlot = (slot) => {
-    setSelectedSlots(prev =>
-      prev.includes(slot) ? prev.filter(s => s !== slot) : [...prev, slot]
-    );
+  const toggleSlot = async (slot) => {
+    const isSelected = selectedSlots.includes(slot);
+    const dateStr = selectedDate.toISOString().split('T')[0];
+
+    if (isSelected) {
+      // Deselect — release lock
+      setSelectedSlots(prev => prev.filter(s => s !== slot));
+      if (user) {
+        try { await api.delete('/bookings/lock', { data: { turfId: id, date: dateStr, timeSlot: slot } }); } catch {}
+      }
+    } else {
+      // Select — try to acquire lock first
+      if (user) {
+        try {
+          await api.post('/bookings/lock', { turfId: id, date: dateStr, timeSlot: slot });
+          setSelectedSlots(prev => [...prev, slot]);
+        } catch (err) {
+          const msg = err.response?.data?.message || 'Slot is held by another user';
+          toast.error(`⏳ ${msg}`);
+          fetchSlotLocks(); // refresh lock display
+        }
+      } else {
+        // Not logged in — just select visually, lock will be checked at booking time
+        setSelectedSlots(prev => [...prev, slot]);
+      }
+    }
   };
 
   const handleBook = async () => {
@@ -420,23 +498,36 @@ export default function TurfDetail() {
                         const total = info ? info.total : 0;
                         const isFullyBooked = avail === 0 && total > 0;
                         const isSelected = selectedSlots.includes(slot);
+                        const lockSecsRemaining = lockCounters[slot];
+                        const isLockedByOther = !isSelected && lockSecsRemaining > 0;
+
+                        const lockMins = lockSecsRemaining ? Math.floor(lockSecsRemaining / 60) : 0;
+                        const lockSecs = lockSecsRemaining ? lockSecsRemaining % 60 : 0;
+                        const lockLabel = lockSecsRemaining
+                          ? `${lockMins}:${String(lockSecs).padStart(2, '0')}`
+                          : null;
 
                         return (
-                          <button key={slot} disabled={isFullyBooked} onClick={() => toggleSlot(slot)}
+                          <button key={slot}
+                            disabled={isFullyBooked || isLockedByOther}
+                            onClick={() => toggleSlot(slot)}
                             className="py-2.5 px-3 rounded-xl text-xs font-medium transition-all duration-200 text-left"
                             style={{
-                              background: isFullyBooked ? '#FEF2F2' : isSelected ? '#2E7D32' : '#F9FAFB',
-                              border: isFullyBooked ? '1px solid #FECACA' : isSelected ? '1px solid #2E7D32' : '1px solid #E5E7EB',
-                              color: isFullyBooked ? '#EF4444' : isSelected ? '#fff' : '#374151',
-                              cursor: isFullyBooked ? 'not-allowed' : 'pointer',
+                              background: isFullyBooked ? '#FEF2F2' : isLockedByOther ? '#FFF7ED' : isSelected ? '#2E7D32' : '#F9FAFB',
+                              border: isFullyBooked ? '1px solid #FECACA' : isLockedByOther ? '1px solid #FED7AA' : isSelected ? '1px solid #2E7D32' : '1px solid #E5E7EB',
+                              color: isFullyBooked ? '#EF4444' : isLockedByOther ? '#C2410C' : isSelected ? '#fff' : '#374151',
+                              cursor: (isFullyBooked || isLockedByOther) ? 'not-allowed' : 'pointer',
                             }}>
-                            <div className="font-semibold">
+                            <div className="font-semibold flex items-center gap-1">
+                              {isLockedByOther && <FiLock style={{ fontSize: '10px' }} />}
                               {isSelected ? '✓ ' : ''}{slot}
                             </div>
-                            <div style={{ fontSize: '10px', marginTop: '2px', opacity: 0.8 }}>
+                            <div style={{ fontSize: '10px', marginTop: '2px', opacity: 0.85 }}>
                               {isFullyBooked
                                 ? '🔴 All boxes full'
-                                : `🟢 ${avail} of ${total} box${total !== 1 ? 'es' : ''} free`}
+                                : isLockedByOther
+                                  ? `🔒 Held — free in ${lockLabel}`
+                                  : `🟢 ${avail} of ${total} box${total !== 1 ? 'es' : ''} free`}
                             </div>
                           </button>
                         );

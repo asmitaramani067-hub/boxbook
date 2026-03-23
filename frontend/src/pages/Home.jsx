@@ -11,9 +11,9 @@ export { CITIES };
 
 const PREVIEW_TURFS = EXPLORE_TURFS.slice(0, 3);
 const PREVIEW_IMGS = [
-  'https://lh3.googleusercontent.com/gps-cs-s/AHVAweqqlp3D822p-bsCb-pHWsYyBzGlpJKOVgTuYs6QVGwbifdkXYRFWCtvXqT9K2PkYfboRxVpUufwl2Ac6C1uTOdZd1d2PU8pBMkuCUt0E5vS98c2ZCjch0yNiApJ7vPLj1pbosfGwOmJwLie=s680-w680-h510-rw',
-  'https://lh3.googleusercontent.com/gps-cs-s/AHVAweojq9dVG9iIHItiyPNNk9M9kSFwJtHksIXQGn1LKhWpIy3RK1bxKL1KB1PUVEXeYoQNlw96hxZBpHk_y7GCr4ldYG1AQbWXdVT6ER_uYcoiqda8z50TgJjkMba-UOI1jsor7COYBw=w141-h235-n-k-no-nu',
-  'https://lh3.googleusercontent.com/p/AF1QipPcA45J2t8NeSviF6X3cCHzf797XxjefeBjSAmq=w243-h174-n-k-no-nu',
+  'https://lh3.googleusercontent.com/gps-cs-s/AHVAweoQsUttYUl21kw5dYXdWAf1D7XjhrcPDvlYLcNqjr7y6pTrRc0uTXlaPoIsx6JSZFkqEmetXISYRRI0m8oNYJAk7kEncPR3qG3TCyTmsaXit-U3XsxV8Thq2ZyURX3Tf8KCJ7oZFg=w243-h406-n-k-no-nu',
+  'https://lh3.googleusercontent.com/gps-cs-s/AHVAwerEQvHUv1qjiBVSMXwNsZvnUq0-WfPHzwgDev2WGzNGChq9_1osxYRpWAuQrtHeovSsTurqY6ZCJMx7HpNscwBWRvlYnevoGgfOEYspX7YzQfQobAlpJg8jYjjMCeV8CUCSHr8=s680-w680-h510-rw',
+  'https://lh3.googleusercontent.com/gps-cs-s/AHVAwerEQvHUv1qjiBVSMXwNsZvnUq0-WfPHzwgDev2WGzNGChq9_1osxYRpWAuQrtHeovSsTurqY6ZCJMx7HpNscwBWRvlYnevoGgfOEYspX7YzQfQobAlpJg8jYjjMCeV8CUCSHr8=s680-w680-h510-rw',
 ];
 
 import heroBg from '../assets/hero.jpg';
