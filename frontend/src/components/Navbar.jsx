@@ -106,40 +106,17 @@ export default function Navbar() {
 
             {/* Logo */}
             <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-              <div className="w-9 h-9 rounded-xl overflow-hidden group-hover:scale-105 transition-transform duration-200 flex-shrink-0 bg-white border border-ink-100 shadow-sm">
-                <svg width="36" height="36" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  {/* Pitch */}
-                  <polygon points="180,420 332,420 290,180 222,180" fill="#2E7D32"/>
-                  <line x1="210" y1="230" x2="302" y2="230" stroke="white" strokeWidth="6" strokeLinecap="round" opacity="0.9"/>
-                  <line x1="196" y1="380" x2="316" y2="380" stroke="white" strokeWidth="6" strokeLinecap="round" opacity="0.9"/>
-                  {/* Stumps */}
-                  <rect x="238" y="188" width="10" height="52" rx="5" fill="white"/>
-                  <rect x="251" y="188" width="10" height="52" rx="5" fill="white"/>
-                  <rect x="264" y="188" width="10" height="52" rx="5" fill="white"/>
-                  <rect x="235" y="186" width="18" height="6" rx="3" fill="#FCD34D"/>
-                  <rect x="259" y="186" width="18" height="6" rx="3" fill="#FCD34D"/>
-                  {/* Outfield */}
-                  <polygon points="60,440 180,420 222,180 130,100" fill="#388E3C"/>
-                  <polygon points="452,440 332,420 290,180 382,100" fill="#388E3C"/>
-                  {/* Bat */}
-                  <rect x="108" y="72" width="52" height="310" rx="26" fill="#2E7D32"/>
-                  <rect x="122" y="370" width="24" height="72" rx="12" fill="#1B5E20"/>
-                  <rect x="108" y="72" width="14" height="310" rx="7" fill="#4CAF50" opacity="0.5"/>
-                  {/* Trail */}
-                  <ellipse cx="260" cy="195" rx="90" ry="18" fill="url(#nt)" transform="rotate(-38 260 195)" opacity="0.7"/>
-                  {/* Ball */}
-                  <circle cx="360" cy="108" r="58" fill="url(#nb)"/>
-                  <ellipse cx="342" cy="90" rx="16" ry="10" fill="white" opacity="0.3" transform="rotate(-30 342 90)"/>
-                  <path d="M330 88 Q348 108 330 128" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.6"/>
-                  <path d="M390 88 Q372 108 390 128" stroke="white" strokeWidth="4" strokeLinecap="round" fill="none" opacity="0.6"/>
+              <div className="w-9 h-9 flex items-center justify-center">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" className="group-hover:rotate-12 transition-transform duration-300">
+                  <circle cx="18" cy="18" r="16" fill="url(#ballGrad)" />
+                  <path d="M10 10 Q18 16 26 10" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.7"/>
+                  <path d="M10 26 Q18 20 26 26" stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none" opacity="0.7"/>
+                  <rect x="22" y="4" width="5" height="14" rx="2.5" fill="#D97706" />
+                  <rect x="23.5" y="17" width="2" height="5" rx="1" fill="#92400E" />
                   <defs>
-                    <linearGradient id="nt" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="white" stopOpacity="0"/>
-                      <stop offset="100%" stopColor="#A5D6A7" stopOpacity="0.9"/>
-                    </linearGradient>
-                    <radialGradient id="nb" cx="38%" cy="35%" r="62%">
-                      <stop offset="0%" stopColor="#FF7043"/>
-                      <stop offset="100%" stopColor="#B71C1C"/>
+                    <radialGradient id="ballGrad" cx="35%" cy="30%" r="65%">
+                      <stop offset="0%" stopColor="#4CAF50" />
+                      <stop offset="100%" stopColor="#1B5E20" />
                     </radialGradient>
                   </defs>
                 </svg>
