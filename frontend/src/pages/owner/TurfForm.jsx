@@ -37,6 +37,8 @@ export default function TurfForm() {
     pricePerHour: '', contactNumber: '', mapLink: '',
     timeSlots: [], amenities: [],
   });
+  const [slotPricing, setSlotPricing] = useState({}); // optional per-slot prices
+  const [enableSlotPricing, setEnableSlotPricing] = useState(false);
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -55,6 +57,9 @@ export default function TurfForm() {
         mapLink: data.mapLink || '', timeSlots: data.timeSlots || [],
         amenities: data.amenities || [],
       });
+      const pricing = data.slotPricing ? Object.fromEntries(Object.entries(data.slotPricing)) : {};
+      setSlotPricing(pricing);
+      setEnableSlotPricing(Object.keys(pricing).length > 0);
       setPreviews(data.images || []);
     } catch {
       toast.error('Failed to load turf');
@@ -108,6 +113,11 @@ export default function TurfForm() {
         if (Array.isArray(v)) v.forEach(item => fd.append(k, item));
         else fd.append(k, v);
       });
+      if (enableSlotPricing && Object.keys(slotPricing).length > 0) {
+        fd.append('slotPricing', JSON.stringify(slotPricing));
+      } else {
+        fd.append('slotPricing', JSON.stringify({}));
+      }
       images.forEach(img => fd.append('images', img));
 
       if (isEdit) {
@@ -250,8 +260,68 @@ export default function TurfForm() {
             )}
           </Section>
 
-          <Section title="Amenities">
-            <div className="flex flex-wrap gap-2">
+          {/* ── Optional Slot Pricing ── */}
+          <motion.div variants={fadeUp} className="card p-6 space-y-4">
+            <div className="flex items-center justify-between border-b border-ink-100 pb-3">
+              <div>
+                <h2 className="font-bold text-base text-ink-900">Slot-Based Pricing</h2>
+                <p className="text-xs text-ink-400 mt-0.5">Optional — set different prices for peak/off-peak hours</p>
+              </div>
+              <button type="button" onClick={() => setEnableSlotPricing(v => !v)}
+                className={`relative w-11 h-6 rounded-full transition-colors duration-200 ${enableSlotPricing ? 'bg-pitch-700' : 'bg-ink-300'}`}>
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${enableSlotPricing ? 'translate-x-5' : ''}`} />
+              </button>
+            </div>
+
+            {enableSlotPricing && (
+              <div className="space-y-3">
+                {form.timeSlots.length === 0 ? (
+                  <p className="text-xs text-ink-400 italic">Select time slots above first to set per-slot prices.</p>
+                ) : (
+                  <>
+                    <p className="text-xs text-ink-500">
+                      Leave a slot blank to use the base price (&#8377;{form.pricePerHour || '—'}/hr).
+                      The card will show "Starting from &#8377;X" based on the lowest price.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {form.timeSlots.map(slot => {
+                        const hour = parseInt(slot.split(':')[0], 10);
+                        const label = hour < 12 ? '🌅 Morning' : hour < 17 ? '☀️ Afternoon' : '🌙 Evening';
+                        return (
+                          <div key={slot} className="flex items-center gap-2 p-2.5 rounded-xl bg-ink-50 border border-ink-200">
+                            <div className="flex-1 min-w-0">
+                              <div className="text-xs font-semibold text-ink-700">{slot}</div>
+                              <div className="text-xs text-ink-400">{label}</div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs text-ink-500">&#8377;</span>
+                              <input
+                                type="number" min="1"
+                                value={slotPricing[slot] || ''}
+                                onChange={e => {
+                                  const val = e.target.value;
+                                  setSlotPricing(prev => {
+                                    const next = { ...prev };
+                                    if (val) next[slot] = Number(val);
+                                    else delete next[slot];
+                                    return next;
+                                  });
+                                }}
+                                placeholder={form.pricePerHour || 'base'}
+                                className="w-20 px-2 py-1 text-xs rounded-lg border border-ink-300 focus:border-pitch-600 focus:outline-none bg-white"
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
+          </motion.div>
+
+          <Section title="Amenities">            <div className="flex flex-wrap gap-2">
               {AMENITIES_LIST.map(a => (
                 <button key={a} type="button" onClick={() => toggleAmenity(a)}
                   className="px-3 py-1.5 rounded-xl text-xs font-medium transition-all duration-200"

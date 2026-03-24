@@ -8,6 +8,13 @@ const PLACEHOLDER = 'https://images.unsplash.com/photo-1540747913346-19e32dc3e97
 export default function TurfCard({ turf }) {
   const img = turf.images?.[0] ? turf.images[0] : PLACEHOLDER;
 
+  // Compute starting price: lowest slot price if slot pricing is set, else base price
+  const slotPricingEntries = turf.slotPricing ? Object.values(turf.slotPricing) : [];
+  const hasSlotPricing = slotPricingEntries.length > 0;
+  const startingPrice = hasSlotPricing
+    ? Math.min(...slotPricingEntries, turf.pricePerHour)
+    : turf.pricePerHour;
+
   return (
     <motion.div variants={fadeUp} className="card card-hover overflow-hidden group">
       <div className="relative h-48 overflow-hidden">
@@ -21,7 +28,10 @@ export default function TurfCard({ turf }) {
         </div>
 
         <div className="absolute bottom-3 left-3">
-          <span className="text-2xl font-black text-white">&#8377;{turf.pricePerHour}</span>
+          {hasSlotPricing && (
+            <div className="text-xs text-gray-300 mb-0.5">Starting from</div>
+          )}
+          <span className="text-2xl font-black text-white">&#8377;{startingPrice}</span>
           <span className="text-xs text-gray-300 ml-1">/hr</span>
         </div>
 

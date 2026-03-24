@@ -35,7 +35,11 @@ exports.getTurf = async (req, res) => {
 exports.createTurf = async (req, res) => {
   try {
     const images = req.files ? req.files.map(f => `/uploads/${f.filename}`) : [];
-    const turf = await Turf.create({ ...req.body, owner: req.user._id, images });
+    const body = { ...req.body };
+    if (body.slotPricing && typeof body.slotPricing === 'string') {
+      try { body.slotPricing = JSON.parse(body.slotPricing); } catch { delete body.slotPricing; }
+    }
+    const turf = await Turf.create({ ...body, owner: req.user._id, images });
     res.status(201).json(turf);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -49,9 +53,13 @@ exports.updateTurf = async (req, res) => {
     if (turf.owner.toString() !== req.user._id.toString())
       return res.status(403).json({ message: 'Not authorized' });
     const newImages = req.files?.length ? req.files.map(f => `/uploads/${f.filename}`) : turf.images;
+    const body = { ...req.body };
+    if (body.slotPricing && typeof body.slotPricing === 'string') {
+      try { body.slotPricing = JSON.parse(body.slotPricing); } catch { delete body.slotPricing; }
+    }
     const updated = await Turf.findByIdAndUpdate(
       req.params.id,
-      { ...req.body, images: newImages },
+      { ...body, images: newImages },
       { new: true }
     );
     res.json(updated);

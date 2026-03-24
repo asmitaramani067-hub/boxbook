@@ -17,6 +17,7 @@ const turfSchema = new mongoose.Schema({
   contactNumber: { type: String, required: true },
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   timeSlots: [{ type: String }],
+  slotPricing: { type: Map, of: Number, default: {} }, // optional per-slot price override
   amenities: [{ type: String }],
   mapLink: { type: String },
   reviews: [reviewSchema],

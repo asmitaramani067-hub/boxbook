@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { FiPlus, FiEdit2, FiTrash2, FiCalendar, FiUsers, FiMapPin, FiTrendingUp } from 'react-icons/fi';
+import { FiPlus, FiEdit2, FiTrash2, FiCalendar, FiUsers, FiMapPin, FiTrendingUp, FiBarChart2 } from 'react-icons/fi';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import toast from 'react-hot-toast';
 import api from '../../services/api';
 import { staggerContainer, fadeUp } from '../../animations/variants';
@@ -15,7 +16,8 @@ export default function OwnerDashboard() {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('turfs');
-  const [confirmDelete, setConfirmDelete] = useState(null); // turfId to delete
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [chartRange, setChartRange] = useState('week'); // 'week' | 'month'
 
   useEffect(() => { fetchData(); }, []);
 
@@ -48,6 +50,29 @@ export default function OwnerDashboard() {
 
   const totalRevenue = bookings.filter(b => b.status === 'confirmed').reduce((s, b) => s + b.totalPrice, 0);
   const confirmedBookings = bookings.filter(b => b.status === 'confirmed').length;
+
+  // Build chart data
+  const buildChartData = () => {
+    const confirmed = bookings.filter(b => b.status === 'confirmed');
+    const days = chartRange === 'week' ? 7 : 30;
+    const data = [];
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const label = chartRange === 'week'
+        ? d.toLocaleDateString('en-IN', { weekday: 'short' })
+        : d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      const dayBookings = confirmed.filter(b => b.date === dateStr || b.createdAt?.startsWith(dateStr));
+      data.push({
+        label,
+        bookings: dayBookings.length,
+        revenue: dayBookings.reduce((s, b) => s + b.totalPrice, 0),
+      });
+    }
+    return data;
+  };
+  const chartData = buildChartData();
 
   if (loading) return (
     <div className="min-h-screen pt-20 flex items-center justify-center bg-ink-50">
@@ -94,7 +119,7 @@ export default function OwnerDashboard() {
 
         {/* Tabs */}
         <div className="flex gap-1 mb-6 p-1 rounded-xl w-fit bg-ink-100 border border-ink-300">
-          {['turfs', 'bookings'].map(tab => (
+          {['turfs', 'bookings', 'analytics'].map(tab => (
             <button key={tab} onClick={() => setActiveTab(tab)}
               className="px-5 py-2 rounded-lg font-semibold text-sm capitalize transition-all duration-200"
               style={{
@@ -189,6 +214,86 @@ export default function OwnerDashboard() {
             ))}
           </motion.div>
         )}
+        {/* Analytics */}
+        {activeTab === 'analytics' && (
+          <motion.div initial="hidden" animate="visible" variants={staggerContainer} className="space-y-6">
+            {/* Range toggle */}
+            <div className="flex items-center gap-2">
+              {['week', 'month'].map(r => (
+                <button key={r} onClick={() => setChartRange(r)}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold capitalize transition-all"
+                  style={{
+                    background: chartRange === r ? '#2E7D32' : '#F3F4F6',
+                    color: chartRange === r ? '#fff' : '#6B7280',
+                  }}>
+                  Last {r === 'week' ? '7 days' : '30 days'}
+                </button>
+              ))}
+            </div>
+
+            {/* Revenue chart */}
+            <motion.div variants={fadeUp} className="card p-6">
+              <div className="flex items-center gap-2 mb-5">
+                <FiBarChart2 className="text-pitch-700" />
+                <h3 className="font-bold text-ink-900">Revenue & Bookings</h3>
+              </div>
+              {chartData.every(d => d.revenue === 0 && d.bookings === 0) ? (
+                <div className="flex flex-col items-center justify-center py-16 text-ink-400">
+                  <FiBarChart2 className="text-4xl mb-3 opacity-30" />
+                  <p className="text-sm">No confirmed bookings in this period yet.</p>
+                </div>
+              ) : (
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={chartData} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" />
+                    <XAxis dataKey="label" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
+                    <YAxis yAxisId="rev" orientation="left" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false}
+                      tickFormatter={v => v >= 1000 ? `₹${(v / 1000).toFixed(1)}k` : `₹${v}`} />
+                    <YAxis yAxisId="bk" orientation="right" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
+                    <Tooltip
+                      contentStyle={{ borderRadius: '12px', border: '1px solid #E5E7EB', fontSize: '12px' }}
+                      formatter={(value, name) => name === 'Revenue' ? [`₹${value}`, name] : [value, name]} />
+                    <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '12px' }} />
+                    <Bar yAxisId="rev" dataKey="revenue" name="Revenue" fill="#2E7D32" radius={[6, 6, 0, 0]} maxBarSize={40} />
+                    <Bar yAxisId="bk" dataKey="bookings" name="Bookings" fill="#A5D6A7" radius={[6, 6, 0, 0]} maxBarSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
+            </motion.div>
+
+            {/* Per-turf breakdown */}
+            <motion.div variants={fadeUp} className="card p-6">
+              <h3 className="font-bold text-ink-900 mb-4">Per-Turf Breakdown</h3>
+              {turfs.length === 0 ? (
+                <p className="text-sm text-ink-400">No turfs yet.</p>
+              ) : (
+                <div className="space-y-3">
+                  {turfs.map(turf => {
+                    const turfBookings = bookings.filter(b => b.turf?._id === turf._id || b.turf === turf._id);
+                    const turfRevenue = turfBookings.filter(b => b.status === 'confirmed').reduce((s, b) => s + b.totalPrice, 0);
+                    const turfConfirmed = turfBookings.filter(b => b.status === 'confirmed').length;
+                    const pct = totalRevenue > 0 ? Math.round((turfRevenue / totalRevenue) * 100) : 0;
+                    return (
+                      <div key={turf._id} className="flex items-center gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-sm font-semibold text-ink-800 truncate">{turf.name}</span>
+                            <span className="text-sm font-black text-pitch-700 ml-2">₹{turfRevenue.toLocaleString()}</span>
+                          </div>
+                          <div className="h-2 rounded-full bg-ink-100 overflow-hidden">
+                            <div className="h-full rounded-full bg-pitch-600 transition-all duration-500" style={{ width: `${pct}%` }} />
+                          </div>
+                          <div className="text-xs text-ink-400 mt-1">{turfConfirmed} confirmed booking{turfConfirmed !== 1 ? 's' : ''} · {pct}% of revenue</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        )}
+
       </div>
 
       <ConfirmDialog

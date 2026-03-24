@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiMapPin, FiPhone, FiStar, FiClock, FiArrowLeft, FiMessageCircle, FiCheck, FiBox, FiCalendar, FiLock } from 'react-icons/fi';
+import { FiMapPin, FiPhone, FiStar, FiClock, FiArrowLeft, FiMessageCircle, FiCheck, FiBox, FiCalendar, FiLock, FiBell, FiBellOff } from 'react-icons/fi';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import toast from 'react-hot-toast';
@@ -124,12 +124,22 @@ export default function TurfDetail() {
   const [activeImg, setActiveImg] = useState(0);
   const [review, setReview] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [waitlist, setWaitlist] = useState(new Set()); // slots user is waiting on
   const lockPollRef = useRef(null);
   const countdownRef = useRef(null);
 
   useEffect(() => { fetchTurf(); }, [id]);
   useEffect(() => { if (turf) { fetchBoxes(); } }, [turf]);
 
+  // Load user's waitlist for this turf+date
+  const fetchWaitlist = useCallback(async () => {
+    if (!user) return;
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    try {
+      const { data } = await api.get('/bookings/waitlist', { params: { turfId: id, date: dateStr } });
+      setWaitlist(new Set(data.map(e => e.slot)));
+    } catch { /* non-critical */ }
+  }, [id, user, selectedDate]);
   const fetchSlotLocks = useCallback(async () => {
     if (!turf) return;
     const dateStr = selectedDate.toISOString().split('T')[0];
@@ -145,6 +155,7 @@ export default function TurfDetail() {
     if (boxes.length) {
       fetchAvailability();
       fetchSlotLocks();
+      fetchWaitlist();
     }
   }, [selectedDate, boxes]);
 
@@ -271,8 +282,26 @@ export default function TurfDetail() {
     }
   };
 
-  const handleReview = async (e) => {
-    e.preventDefault();
+  const toggleWaitlist = async (slot) => {
+    if (!user) return navigate('/login');
+    const dateStr = selectedDate.toISOString().split('T')[0];
+    const isOn = waitlist.has(slot);
+    try {
+      if (isOn) {
+        await api.delete('/bookings/waitlist', { data: { turfId: id, date: dateStr, timeSlot: slot } });
+        setWaitlist(prev => { const n = new Set(prev); n.delete(slot); return n; });
+        toast.success('Removed from waitlist');
+      } else {
+        await api.post('/bookings/waitlist', { turfId: id, date: dateStr, timeSlot: slot });
+        setWaitlist(prev => new Set([...prev, slot]));
+        toast.success("You're on the waitlist! We'll notify you if a slot opens.");
+      }
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to update waitlist');
+    }
+  };
+
+  const handleReview = async (e) => {    e.preventDefault();
     if (!user) return navigate('/login');
     setSubmittingReview(true);
     try {
@@ -351,7 +380,14 @@ export default function TurfDetail() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-3xl font-black text-pitch-700">&#8377;{turf.pricePerHour}</div>
+                      {turf.slotPricing && Object.keys(turf.slotPricing).length > 0 && (
+                        <div className="text-xs text-ink-400 mb-0.5">Starting from</div>
+                      )}
+                      <div className="text-3xl font-black text-pitch-700">
+                        &#8377;{turf.slotPricing && Object.keys(turf.slotPricing).length > 0
+                          ? Math.min(...Object.values(turf.slotPricing), turf.pricePerHour)
+                          : turf.pricePerHour}
+                      </div>
                       <div className="text-xs text-ink-500">per hour / per box</div>
                     </div>
                   </div>
@@ -507,16 +543,20 @@ export default function TurfDetail() {
                           ? `${lockMins}:${String(lockSecs).padStart(2, '0')}`
                           : null;
 
+                        // Per-slot price
+                        const slotPrice = turf.slotPricing?.[slot] || turf.pricePerHour;
+                        const isWaiting = waitlist.has(slot);
+
                         return (
                           <button key={slot}
-                            disabled={isFullyBooked || isLockedByOther}
-                            onClick={() => toggleSlot(slot)}
+                            disabled={isLockedByOther}
+                            onClick={() => isFullyBooked ? toggleWaitlist(slot) : toggleSlot(slot)}
                             className="py-2.5 px-3 rounded-xl text-xs font-medium transition-all duration-200 text-left"
                             style={{
-                              background: isFullyBooked ? '#FEF2F2' : isLockedByOther ? '#FFF7ED' : isSelected ? '#2E7D32' : '#F9FAFB',
-                              border: isFullyBooked ? '1px solid #FECACA' : isLockedByOther ? '1px solid #FED7AA' : isSelected ? '1px solid #2E7D32' : '1px solid #E5E7EB',
-                              color: isFullyBooked ? '#EF4444' : isLockedByOther ? '#C2410C' : isSelected ? '#fff' : '#374151',
-                              cursor: (isFullyBooked || isLockedByOther) ? 'not-allowed' : 'pointer',
+                              background: isFullyBooked ? (isWaiting ? '#FFF7ED' : '#FEF2F2') : isLockedByOther ? '#FFF7ED' : isSelected ? '#2E7D32' : '#F9FAFB',
+                              border: isFullyBooked ? (isWaiting ? '1px solid #FED7AA' : '1px solid #FECACA') : isLockedByOther ? '1px solid #FED7AA' : isSelected ? '1px solid #2E7D32' : '1px solid #E5E7EB',
+                              color: isFullyBooked ? (isWaiting ? '#C2410C' : '#EF4444') : isLockedByOther ? '#C2410C' : isSelected ? '#fff' : '#374151',
+                              cursor: isLockedByOther ? 'not-allowed' : 'pointer',
                             }}>
                             <div className="font-semibold flex items-center gap-1">
                               {isLockedByOther && <FiLock style={{ fontSize: '10px' }} />}
@@ -524,10 +564,13 @@ export default function TurfDetail() {
                             </div>
                             <div style={{ fontSize: '10px', marginTop: '2px', opacity: 0.85 }}>
                               {isFullyBooked
-                                ? '🔴 All boxes full'
+                                ? (isWaiting ? '🔔 On waitlist — tap to remove' : '🔴 Full — tap to join waitlist')
                                 : isLockedByOther
                                   ? `🔒 Held — free in ${lockLabel}`
                                   : `🟢 ${avail} of ${total} box${total !== 1 ? 'es' : ''} free`}
+                            </div>
+                            <div style={{ fontSize: '10px', marginTop: '1px', fontWeight: 600, opacity: isFullyBooked ? 0.5 : 1 }}>
+                              &#8377;{slotPrice}/hr
                             </div>
                           </button>
                         );
@@ -546,16 +589,21 @@ export default function TurfDetail() {
                     </div>
                     <div className="space-y-1">
                       <span className="text-ink-500 text-xs">Slots ({selectedSlots.length}h)</span>
-                      {selectedSlots.map(s => (
-                        <div key={s} className="flex justify-between pl-2 border-l-2 border-pitch-300">
-                          <span className="text-ink-700 font-medium">{s}</span>
-                          <span className="text-ink-500">&#8377;{turf.pricePerHour}</span>
-                        </div>
-                      ))}
+                      {selectedSlots.map(s => {
+                        const slotPrice = turf.slotPricing?.[s] || turf.pricePerHour;
+                        return (
+                          <div key={s} className="flex justify-between pl-2 border-l-2 border-pitch-300">
+                            <span className="text-ink-700 font-medium">{s}</span>
+                            <span className="text-ink-500">&#8377;{slotPrice}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                     <div className="flex justify-between font-bold pt-2 border-t border-pitch-200">
                       <span className="text-ink-900">Total</span>
-                      <span className="text-pitch-700 text-base">&#8377;{turf.pricePerHour * selectedSlots.length}</span>
+                      <span className="text-pitch-700 text-base">
+                        &#8377;{selectedSlots.reduce((sum, s) => sum + (turf.slotPricing?.[s] || turf.pricePerHour), 0)}
+                      </span>
                     </div>
                   </motion.div>
                 )}
@@ -566,7 +614,7 @@ export default function TurfDetail() {
                   {booking
                     ? <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     : selectedSlots.length > 1
-                      ? `🏏 Book ${selectedSlots.length} Slots`
+                      ? `🏏 Book ${selectedSlots.length} Slots — ₹${selectedSlots.reduce((sum, s) => sum + (turf.slotPricing?.[s] || turf.pricePerHour), 0)}`
                       : '🏏 Confirm Booking'}
                 </motion.button>
 
