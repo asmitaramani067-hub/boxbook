@@ -8,7 +8,96 @@ import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 import { subscribeToPush } from '../utils/pushSubscribe';
 
-// Page title map removed — mobile header now shows logo + wordmark
+// ─── Bell dropdown — defined OUTSIDE Navbar so it never remounts on re-render ───
+function BellDropdown({ notifications, unreadCount, bellOpen, setBellOpen, markAllRead, pushEnabled, onEnablePush, isMobile }) {
+  const ref = useRef(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e) => {
+      if (ref.current && !ref.current.contains(e.target)) setBellOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [setBellOpen]);
+
+  const toggle = () => {
+    const next = !bellOpen;
+    setBellOpen(next);
+    if (next) markAllRead();
+  };
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        onClick={toggle}
+        className={`relative rounded-xl flex items-center justify-center text-ink-500 hover:text-pitch-700 hover:bg-ink-100 transition-colors ${
+          isMobile ? 'w-9 h-9' : 'p-2'
+        }`}
+      >
+        <FiBell className={isMobile ? 'text-lg' : 'text-xl'} />
+        {unreadCount > 0 && (
+          <span className={`absolute bg-red-500 text-white font-black rounded-full flex items-center justify-center ${
+            isMobile
+              ? 'top-1 right-1 w-3.5 h-3.5 text-[9px]'
+              : '-top-0.5 -right-0.5 w-4 h-4 text-[10px]'
+          }`}>
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </span>
+        )}
+      </button>
+
+      <AnimatePresence>
+        {bellOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className="absolute right-0 mt-2 rounded-2xl overflow-hidden bg-white border border-ink-200 shadow-2xl"
+            style={{ zIndex: 9999, width: 'min(320px, calc(100vw - 24px))' }}
+          >
+            <div className="px-4 py-3 border-b border-ink-100 flex items-center justify-between">
+              <span className="font-bold text-ink-900 text-sm">Notifications</span>
+              {notifications.length > 0 && (
+                <button onClick={markAllRead} className="text-xs text-pitch-700 font-semibold hover:underline">
+                  Mark all read
+                </button>
+              )}
+            </div>
+
+            {!pushEnabled && 'Notification' in window && Notification.permission !== 'denied' && (
+              <div className="px-4 py-3 bg-amber-50 border-b border-amber-100 flex items-center gap-3">
+                <span className="text-lg">🔔</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-amber-800">Enable push notifications</p>
+                  <p className="text-xs text-amber-600">Get notified instantly on your device</p>
+                </div>
+                <button
+                  onClick={onEnablePush}
+                  className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 transition-colors active:scale-95"
+                >
+                  Enable
+                </button>
+              </div>
+            )}
+
+            <div className="max-h-72 overflow-y-auto">
+              {notifications.length === 0
+                ? <p className="text-center text-ink-400 text-sm py-8">No notifications yet</p>
+                : notifications.map(n => (
+                  <div key={n._id} className={`px-4 py-3 border-b border-ink-50 text-sm ${n.isRead ? 'text-ink-500' : 'text-ink-900 bg-pitch-50'}`}>
+                    <p className={!n.isRead ? 'font-semibold' : ''}>{n.message}</p>
+                    <p className="text-xs text-ink-400 mt-0.5">{new Date(n.createdAt).toLocaleString()}</p>
+                  </div>
+                ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -20,14 +109,11 @@ export default function Navbar() {
   const [bellOpen, setBellOpen] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
 
-  // Check current push permission state on mount
-  useEffect(() => {
-    if ('Notification' in window) {
-      setPushEnabled(Notification.permission === 'granted');
-    }
-  }, []);
-  const bellRef = useRef(null);
   const dropRef = useRef(null);
+
+  useEffect(() => {
+    if ('Notification' in window) setPushEnabled(Notification.permission === 'granted');
+  }, []);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
@@ -55,9 +141,9 @@ export default function Navbar() {
     setPushEnabled(Notification.permission === 'granted');
   };
 
+  // Close user dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (bellRef.current && !bellRef.current.contains(e.target)) setBellOpen(false);
       if (dropRef.current && !dropRef.current.contains(e.target)) setDropOpen(false);
     };
     document.addEventListener('mousedown', handler);
@@ -73,6 +159,8 @@ export default function Navbar() {
   useEffect(() => { setDropOpen(false); setBellOpen(false); }, [location.pathname]);
 
   const handleLogout = () => { logout(); navigate('/'); };
+
+  const bellProps = { notifications, unreadCount, bellOpen, setBellOpen, markAllRead, pushEnabled, onEnablePush: handleEnablePush };
 
   const navLinks = user?.role === 'owner'
     ? [
@@ -101,58 +189,6 @@ export default function Navbar() {
       ];
 
   const isActive = (path) => path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
-
-  const BellDropdown = () => (
-    <div className="relative" ref={bellRef}>
-      <button onClick={() => { setBellOpen(o => !o); if (!bellOpen) markAllRead(); }}
-        className="relative p-2 rounded-xl text-ink-600 hover:bg-ink-100 transition-colors">
-        <FiBell className="text-xl" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
-      <AnimatePresence>
-        {bellOpen && (
-          <motion.div initial={{ opacity: 0, y: -8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.95 }} transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-2 w-80 rounded-2xl overflow-hidden bg-white border border-ink-200 shadow-2xl" style={{ zIndex: 9999 }}>
-            <div className="px-4 py-3 border-b border-ink-100 flex items-center justify-between">
-              <span className="font-bold text-ink-900 text-sm">Notifications</span>
-              {notifications.length > 0 && (
-                <button onClick={markAllRead} className="text-xs text-pitch-700 font-semibold hover:underline">Mark all read</button>
-              )}
-            </div>
-            {/* Push permission prompt */}
-            {!pushEnabled && 'Notification' in window && Notification.permission !== 'denied' && (
-              <div className="px-4 py-3 bg-amber-50 border-b border-amber-100 flex items-center gap-3">
-                <span className="text-lg">🔔</span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-amber-800">Enable push notifications</p>
-                  <p className="text-xs text-amber-600">Get notified instantly on your device</p>
-                </div>
-                <button onClick={handleEnablePush}
-                  className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 transition-colors active:scale-95">
-                  Enable
-                </button>
-              </div>
-            )}
-            <div className="max-h-72 overflow-y-auto">
-              {notifications.length === 0
-                ? <p className="text-center text-ink-400 text-sm py-8">No notifications yet</p>
-                : notifications.map(n => (
-                  <div key={n._id} className={`px-4 py-3 border-b border-ink-50 text-sm ${n.isRead ? 'text-ink-500' : 'text-ink-900 bg-pitch-50'}`}>
-                    <p className={!n.isRead ? 'font-semibold' : ''}>{n.message}</p>
-                    <p className="text-xs text-ink-400 mt-0.5">{new Date(n.createdAt).toLocaleString()}</p>
-                  </div>
-                ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
 
   return (
     <>
@@ -203,7 +239,7 @@ export default function Navbar() {
 
             {/* Right */}
             <div className="flex items-center gap-2">
-              {user && <BellDropdown />}
+              {user && <BellDropdown {...bellProps} isMobile={false} />}
               {user ? (
                 <div className="relative" ref={dropRef}>
                   <button onClick={() => setDropOpen(d => !d)}
@@ -253,7 +289,6 @@ export default function Navbar() {
 
       {/* ════════════════════════════════════════
           MOBILE top header (< lg)
-          Full-width, green bg, page title + avatar
       ════════════════════════════════════════ */}
       <header className="lg:hidden fixed top-0 left-0 right-0 z-50 bg-white border-b border-ink-100 shadow-sm">
         <div className="flex items-center justify-between px-4 h-14 gap-3">
@@ -285,63 +320,14 @@ export default function Navbar() {
 
           {/* Right: search + bell + avatar */}
           <div className="flex items-center gap-1 flex-shrink-0">
-            {/* Quick search shortcut */}
             <button onClick={() => navigate('/turfs')}
               className="w-9 h-9 rounded-xl flex items-center justify-center text-ink-500 hover:text-pitch-700 hover:bg-ink-100 transition-colors">
               <FiSearch className="text-lg" />
             </button>
 
-            {/* Bell — all logged-in users */}
-            {user && (
-              <div className="relative" ref={bellRef}>
-                <button onClick={() => { setBellOpen(o => !o); if (!bellOpen) markAllRead(); }}
-                  className="w-9 h-9 rounded-xl flex items-center justify-center text-ink-500 hover:text-pitch-700 hover:bg-ink-100 transition-colors relative">
-                  <FiBell className="text-lg" />
-                  {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-red-500 text-white text-[9px] font-black rounded-full flex items-center justify-center">
-                      {unreadCount > 9 ? '9+' : unreadCount}
-                    </span>
-                  )}
-                </button>
-                <AnimatePresence>
-                  {bellOpen && (
-                    <motion.div initial={{ opacity: 0, y: -8, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }}
-                      exit={{ opacity: 0, y: -8, scale: 0.95 }} transition={{ duration: 0.15 }}
-                      className="absolute right-0 mt-2 w-80 rounded-2xl overflow-hidden bg-white border border-ink-200 shadow-2xl" style={{ zIndex: 9999 }}>
-                      <div className="px-4 py-3 border-b border-ink-100 flex items-center justify-between">
-                        <span className="font-bold text-ink-900 text-sm">Notifications</span>
-                        {notifications.length > 0 && <button onClick={markAllRead} className="text-xs text-pitch-700 font-semibold hover:underline">Mark all read</button>}
-                      </div>
-                      {!pushEnabled && 'Notification' in window && Notification.permission !== 'denied' && (
-                        <div className="px-4 py-3 bg-amber-50 border-b border-amber-100 flex items-center gap-3">
-                          <span className="text-lg">🔔</span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-semibold text-amber-800">Enable push notifications</p>
-                            <p className="text-xs text-amber-600">Get notified instantly</p>
-                          </div>
-                          <button onClick={handleEnablePush}
-                            className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 transition-colors active:scale-95">
-                            Enable
-                          </button>
-                        </div>
-                      )}
-                      <div className="max-h-72 overflow-y-auto">
-                        {notifications.length === 0
-                          ? <p className="text-center text-ink-400 text-sm py-8">No notifications yet</p>
-                          : notifications.map(n => (
-                            <div key={n._id} className={`px-4 py-3 border-b border-ink-50 text-sm ${n.isRead ? 'text-ink-500' : 'text-ink-900 bg-pitch-50'}`}>
-                              <p className={!n.isRead ? 'font-semibold' : ''}>{n.message}</p>
-                              <p className="text-xs text-ink-400 mt-0.5">{new Date(n.createdAt).toLocaleString()}</p>
-                            </div>
-                          ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            )}
+            {user && <BellDropdown {...bellProps} isMobile={true} />}
 
-            {/* Avatar — opens mini dropdown, not direct logout */}
+            {/* Avatar dropdown */}
             {user ? (
               <div className="relative" ref={dropRef}>
                 <button

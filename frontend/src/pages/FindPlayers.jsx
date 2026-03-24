@@ -452,27 +452,36 @@ export default function FindPlayers() {
 
         {/* ── Hero ── */}
         <div className="bg-gradient-to-br from-pitch-900 via-pitch-800 to-pitch-700 pt-24 pb-12 px-4 relative overflow-hidden">
-          <div className="absolute -right-10 -top-10 text-[220px] opacity-[0.05] select-none pointer-events-none leading-none">🏏</div>
-          <div className="absolute bottom-0 left-0 w-80 h-80 rounded-full opacity-[0.08] pointer-events-none"
-            style={{ background: 'radial-gradient(circle, #A5D6A7, transparent)', transform: 'translate(-40%, 40%)' }} />
+          {/* decorative blobs */}
+          <div className="absolute -right-10 -top-10 text-[220px] opacity-[0.04] select-none pointer-events-none leading-none">🏏</div>
+          <div className="absolute bottom-0 left-0 w-96 h-96 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(165,214,167,0.12), transparent)', transform: 'translate(-40%, 40%)' }} />
+          <div className="absolute top-0 right-0 w-64 h-64 rounded-full pointer-events-none"
+            style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.05), transparent)', transform: 'translate(30%, -30%)' }} />
 
           <div className="max-w-5xl mx-auto relative">
             <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }}
-              className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
               <div>
-                <p className="text-pitch-400 text-xs font-bold uppercase tracking-widest mb-2">🏏 Cricket · Find Players</p>
+                {/* eyebrow */}
+                <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 rounded-full px-3 py-1 mb-4">
+                  <span className="text-sm">🏏</span>
+                  <span className="text-white/80 text-xs font-semibold tracking-wide uppercase">Cricket · Find Players</span>
+                </div>
                 <h1 className="text-4xl sm:text-5xl font-black text-white leading-[1.1]">
                   Need players<br />
                   <span className="text-pitch-300">for today?</span>
                 </h1>
-                <p className="text-pitch-200 mt-3 text-sm max-w-xs leading-relaxed">
-                  Post in 30 seconds. Players nearby join instantly. No calls, no WhatsApp groups.
+                <p className="text-white/60 mt-3 text-sm max-w-xs leading-relaxed">
+                  Post in 30 seconds. Players nearby join instantly.<br className="hidden sm:block" /> No calls, no WhatsApp groups.
                 </p>
               </div>
+
+              {/* CTA button — amber accent so it pops on green */}
               <motion.button
-                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.96 }}
+                whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.96 }}
                 onClick={() => { if (!user) return navigate('/login'); setShowModal(true); }}
-                className="flex items-center gap-2.5 px-8 py-4 rounded-2xl font-black text-base bg-white text-pitch-800 hover:bg-pitch-50 transition-all shadow-2xl shadow-black/30 whitespace-nowrap flex-shrink-0">
+                className="flex items-center gap-2.5 px-8 py-4 rounded-2xl font-black text-base bg-amber-400 text-amber-900 hover:bg-amber-300 transition-all shadow-2xl shadow-black/30 whitespace-nowrap flex-shrink-0 border border-amber-300">
                 <FiPlus className="text-lg" /> Post a Match
               </motion.button>
             </motion.div>
@@ -480,24 +489,26 @@ export default function FindPlayers() {
             {/* Live stats */}
             {!loading && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }}
-                className="flex items-center gap-6 mt-8 flex-wrap">
-                <div>
-                  <div className="text-3xl font-black text-white">{openMatches.length}</div>
-                  <div className="text-pitch-300 text-xs font-medium">matches need players</div>
+                className="flex items-center gap-8 mt-10 flex-wrap">
+                <div className="flex flex-col">
+                  <div className="text-3xl font-black text-white tabular-nums">{openMatches.length}</div>
+                  <div className="text-white/50 text-xs font-medium mt-0.5">matches need players</div>
                 </div>
+                <div className="w-px h-10 bg-white/15" />
                 {urgentCount > 0 && (
                   <>
-                    <div className="w-px h-8 bg-white/20" />
-                    <div>
-                      <div className="text-3xl font-black text-red-400">{urgentCount} 🔥</div>
-                      <div className="text-pitch-300 text-xs font-medium">starting within 3 hours</div>
+                    <div className="flex flex-col">
+                      <div className="text-3xl font-black text-red-400 tabular-nums flex items-center gap-1.5">
+                        {urgentCount} <span className="text-2xl">🔥</span>
+                      </div>
+                      <div className="text-white/50 text-xs font-medium mt-0.5">starting within 3 hours</div>
                     </div>
+                    <div className="w-px h-10 bg-white/15" />
                   </>
                 )}
-                <div className="w-px h-8 bg-white/20" />
-                <div>
-                  <div className="text-3xl font-black text-white">{spotsTotal}</div>
-                  <div className="text-pitch-300 text-xs font-medium">total spots open</div>
+                <div className="flex flex-col">
+                  <div className="text-3xl font-black text-white tabular-nums">{spotsTotal}</div>
+                  <div className="text-white/50 text-xs font-medium mt-0.5">total spots open</div>
                 </div>
               </motion.div>
             )}
@@ -521,10 +532,10 @@ export default function FindPlayers() {
               )}
             </div>
             {/* Tabs row */}
-            <div className="flex items-center gap-1 bg-ink-100 rounded-xl p-1">
+            <div className="flex items-center gap-1 bg-ink-100 rounded-xl p-1 overflow-x-auto scrollbar-none">
               {TABS.map(t => (
                 <button key={t.value} onClick={() => setTab(t.value)}
-                  className={`flex-1 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
+                  className={`flex-shrink-0 px-4 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all ${
                     tab === t.value ? 'bg-white text-pitch-700 shadow-sm' : 'text-ink-500 hover:text-ink-800'
                   }`}>
                   {t.label}
