@@ -9,11 +9,14 @@ self.addEventListener('push', (event) => {
       body: data.body || 'You have a new notification',
       icon: '/favicon.svg',
       badge: '/favicon.svg',
+      data: data.data || {},
     })
   );
 });
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  event.waitUntil(clients.openWindow('/owner/dashboard'));
+  // owners go to dashboard, players go to turfs listing
+  const url = event.notification.data?.url || '/';
+  event.waitUntil(clients.openWindow(url));
 });

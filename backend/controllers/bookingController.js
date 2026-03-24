@@ -3,7 +3,6 @@ const Turf = require('../models/Turf');
 const Box = require('../models/Box');
 const User = require('../models/User');
 const Waitlist = require('../models/Waitlist');
-const sendEmail = require('../utils/sendEmail');
 const Notification = require('../models/Notification');
 const webpush = require('web-push');
 const { acquireLock, releaseLock, isLockedByOther, getLocksForTurfDate, LOCK_TTL_MS } = require('../utils/slotLock');
@@ -26,13 +25,12 @@ async function notifyWaitlist(turfId, date, timeSlot) {
     const turf = await Turf.findById(turfId).select('name');
     const msg = `A slot just opened up! ${turf?.name} — ${timeSlot} on ${date} is now available. Book quickly before it fills up.`;
     await Notification.create({ owner: entry.user._id, message: msg });
-    if (entry.user.email) {
-      sendEmail(entry.user.email, `Slot Available — ${turf?.name}`,
-        `<h2>Good news! A slot opened up 🏏</h2><p>${msg}</p><p><a href="${process.env.FRONTEND_URL}/turfs/${turfId}">Book now</a></p>`
-      ).catch(() => {});
-    }
     if (entry.user.pushSubscription) {
-      webpush.sendNotification(entry.user.pushSubscription, JSON.stringify({ title: 'Slot Available!', body: msg })).catch(() => {});
+      webpush.sendNotification(entry.user.pushSubscription, JSON.stringify({
+        title: 'Slot Available!',
+        body: msg,
+        data: { url: `${process.env.FRONTEND_URL}/turfs/${turfId}` },
+      })).catch(() => {});
     }
   } catch (e) {
     console.error('Waitlist notify error:', e.message);
@@ -92,24 +90,6 @@ exports.createBooking = async (req, res) => {
         }));
       }
     } catch (pushErr) { console.error('Push notification failed:', pushErr.message); }
-
-    try {
-      const owner = await User.findById(turf.owner).select('email name');
-      if (owner?.email) {
-        await sendEmail(owner.email, `New Booking at ${turf.name}`, `
-          <h2>New Booking Received</h2>
-          <p>Hi ${owner.name}, you have a new booking at <strong>${turf.name}</strong>.</p>
-          <table style="border-collapse:collapse;width:100%">
-            <tr><td style="padding:6px;border:1px solid #ddd"><strong>Player</strong></td><td style="padding:6px;border:1px solid #ddd">${booking.playerName}</td></tr>
-            <tr><td style="padding:6px;border:1px solid #ddd"><strong>Phone</strong></td><td style="padding:6px;border:1px solid #ddd">${booking.playerPhone || 'N/A'}</td></tr>
-            <tr><td style="padding:6px;border:1px solid #ddd"><strong>Date</strong></td><td style="padding:6px;border:1px solid #ddd">${booking.date}</td></tr>
-            <tr><td style="padding:6px;border:1px solid #ddd"><strong>Time Slot</strong></td><td style="padding:6px;border:1px solid #ddd">${booking.timeSlot}</td></tr>
-            <tr><td style="padding:6px;border:1px solid #ddd"><strong>Box</strong></td><td style="padding:6px;border:1px solid #ddd">${freeBox.name}</td></tr>
-            <tr><td style="padding:6px;border:1px solid #ddd"><strong>Amount</strong></td><td style="padding:6px;border:1px solid #ddd">₹${booking.totalPrice}</td></tr>
-          </table>
-        `);
-      }
-    } catch (emailErr) { console.error('Owner notification email failed:', emailErr.message); }
 
     res.status(201).json(booking);
   } catch (err) {

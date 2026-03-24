@@ -18,15 +18,22 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [bellOpen, setBellOpen] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
+
+  // Check current push permission state on mount
+  useEffect(() => {
+    if ('Notification' in window) {
+      setPushEnabled(Notification.permission === 'granted');
+    }
+  }, []);
   const bellRef = useRef(null);
   const dropRef = useRef(null);
 
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   useEffect(() => {
-    if (user?.role === 'owner') {
+    if (user) {
       fetchNotifications();
-      subscribeToPush();
       const interval = setInterval(fetchNotifications, 30000);
       return () => clearInterval(interval);
     }
@@ -41,6 +48,11 @@ export default function Navbar() {
       await api.patch('/notifications/read-all');
       setNotifications(n => n.map(x => ({ ...x, isRead: true })));
     } catch {}
+  };
+
+  const handleEnablePush = async () => {
+    await subscribeToPush();
+    setPushEnabled(Notification.permission === 'granted');
   };
 
   useEffect(() => {
@@ -90,7 +102,6 @@ export default function Navbar() {
 
   const isActive = (path) => path === '/' ? location.pathname === '/' : location.pathname.startsWith(path);
 
-  // ── Notification dropdown (shared) ──────────────────────────────────────
   const BellDropdown = () => (
     <div className="relative" ref={bellRef}>
       <button onClick={() => { setBellOpen(o => !o); if (!bellOpen) markAllRead(); }}
@@ -113,6 +124,20 @@ export default function Navbar() {
                 <button onClick={markAllRead} className="text-xs text-pitch-700 font-semibold hover:underline">Mark all read</button>
               )}
             </div>
+            {/* Push permission prompt */}
+            {!pushEnabled && 'Notification' in window && Notification.permission !== 'denied' && (
+              <div className="px-4 py-3 bg-amber-50 border-b border-amber-100 flex items-center gap-3">
+                <span className="text-lg">🔔</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-amber-800">Enable push notifications</p>
+                  <p className="text-xs text-amber-600">Get notified instantly on your device</p>
+                </div>
+                <button onClick={handleEnablePush}
+                  className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 transition-colors active:scale-95">
+                  Enable
+                </button>
+              </div>
+            )}
             <div className="max-h-72 overflow-y-auto">
               {notifications.length === 0
                 ? <p className="text-center text-ink-400 text-sm py-8">No notifications yet</p>
@@ -178,7 +203,7 @@ export default function Navbar() {
 
             {/* Right */}
             <div className="flex items-center gap-2">
-              {user?.role === 'owner' && <BellDropdown />}
+              {user && <BellDropdown />}
               {user ? (
                 <div className="relative" ref={dropRef}>
                   <button onClick={() => setDropOpen(d => !d)}
@@ -266,8 +291,8 @@ export default function Navbar() {
               <FiSearch className="text-lg" />
             </button>
 
-            {/* Bell — owner only */}
-            {user?.role === 'owner' && (
+            {/* Bell — all logged-in users */}
+            {user && (
               <div className="relative" ref={bellRef}>
                 <button onClick={() => { setBellOpen(o => !o); if (!bellOpen) markAllRead(); }}
                   className="w-9 h-9 rounded-xl flex items-center justify-center text-ink-500 hover:text-pitch-700 hover:bg-ink-100 transition-colors relative">
@@ -287,6 +312,19 @@ export default function Navbar() {
                         <span className="font-bold text-ink-900 text-sm">Notifications</span>
                         {notifications.length > 0 && <button onClick={markAllRead} className="text-xs text-pitch-700 font-semibold hover:underline">Mark all read</button>}
                       </div>
+                      {!pushEnabled && 'Notification' in window && Notification.permission !== 'denied' && (
+                        <div className="px-4 py-3 bg-amber-50 border-b border-amber-100 flex items-center gap-3">
+                          <span className="text-lg">🔔</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-amber-800">Enable push notifications</p>
+                            <p className="text-xs text-amber-600">Get notified instantly</p>
+                          </div>
+                          <button onClick={handleEnablePush}
+                            className="flex-shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-white hover:bg-amber-600 transition-colors active:scale-95">
+                            Enable
+                          </button>
+                        </div>
+                      )}
                       <div className="max-h-72 overflow-y-auto">
                         {notifications.length === 0
                           ? <p className="text-center text-ink-400 text-sm py-8">No notifications yet</p>
