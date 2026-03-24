@@ -12,24 +12,31 @@ import { subscribeToPush } from '../utils/pushSubscribe';
 function BellDropdown({ notifications, unreadCount, bellOpen, setBellOpen, markAllRead, pushEnabled, onEnablePush, isMobile }) {
   const ref = useRef(null);
 
-  // Close on outside click
+  // Close on outside click/touch — covers both desktop and mobile
   useEffect(() => {
     const handler = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setBellOpen(false);
     };
     document.addEventListener('mousedown', handler);
-    return () => document.removeEventListener('mousedown', handler);
+    document.addEventListener('touchstart', handler);
+    return () => {
+      document.removeEventListener('mousedown', handler);
+      document.removeEventListener('touchstart', handler);
+    };
   }, [setBellOpen]);
 
-  const toggle = () => {
-    const next = !bellOpen;
-    setBellOpen(next);
-    if (next) markAllRead();
+  const toggle = (e) => {
+    e.stopPropagation();
+    setBellOpen(prev => {
+      if (!prev) markAllRead();
+      return !prev;
+    });
   };
 
   return (
     <div className="relative" ref={ref}>
       <button
+        onTouchStart={e => e.stopPropagation()}
         onClick={toggle}
         className={`relative rounded-xl flex items-center justify-center text-ink-500 hover:text-pitch-700 hover:bg-ink-100 transition-colors ${
           isMobile ? 'w-9 h-9' : 'p-2'
@@ -54,8 +61,11 @@ function BellDropdown({ notifications, unreadCount, bellOpen, setBellOpen, markA
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.95 }}
             transition={{ duration: 0.15 }}
-            className="absolute right-0 mt-2 rounded-2xl overflow-hidden bg-white border border-ink-200 shadow-2xl"
-            style={{ zIndex: 9999, width: 'min(320px, calc(100vw - 24px))' }}
+            className={`${isMobile ? 'fixed top-16 right-3' : 'absolute right-0 mt-2'} rounded-2xl overflow-hidden bg-white border border-ink-200 shadow-2xl`}
+            style={{
+              zIndex: 9999,
+              width: 'min(320px, calc(100vw - 24px))',
+            }}
           >
             <div className="px-4 py-3 border-b border-ink-100 flex items-center justify-between">
               <span className="font-bold text-ink-900 text-sm">Notifications</span>
