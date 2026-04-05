@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Register — PitchUp</title>
+  <link href="css/style.css" rel="stylesheet"/>
+</head>
+<body>
+<div id="nav-container"></div>
+
+<div class="auth-header">
+  <h1 style="font-size:1.875rem;font-weight:900;color:#fff;margin-bottom:6px">Join PitchUp</h1>
+  <p style="color:var(--pitch-300);font-size:0.875rem">Create your account and start playing</p>
+</div>
+
+<div style="display:flex;justify-content:center;padding:0 16px 64px;margin-top:-32px">
+  <div style="width:100%;max-width:448px">
+    <form id="register-form" style="background:#fff;border-radius:16px;padding:32px;box-shadow:0 16px 48px rgba(0,0,0,0.1);border:1px solid var(--ink-100)">
+
+      <!-- Role selector -->
+      <div style="margin-bottom:20px">
+        <label class="form-label">I am a...</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <button type="button" id="role-player" onclick="setRole('player')" style="padding:16px;border-radius:12px;text-align:left;border:2px solid var(--pitch-600);background:var(--pitch-50);cursor:pointer;transition:all 0.2s">
+            <div style="font-size:1.25rem;margin-bottom:8px">👤</div>
+            <p style="font-weight:700;font-size:0.875rem;color:var(--pitch-900)">Player</p>
+            <p style="font-size:0.75rem;color:var(--ink-400);margin-top:2px">Find & book turfs</p>
+          </button>
+          <button type="button" id="role-owner" onclick="setRole('owner')" style="padding:16px;border-radius:12px;text-align:left;border:2px solid var(--ink-200);background:#fff;cursor:pointer;transition:all 0.2s">
+            <div style="font-size:1.25rem;margin-bottom:8px">✅</div>
+            <p style="font-weight:700;font-size:0.875rem;color:var(--ink-700)">Turf Owner</p>
+            <p style="font-size:0.75rem;color:var(--ink-400);margin-top:2px">List & manage turfs</p>
+          </button>
+        </div>
+      </div>
+
+      <!-- Name -->
+      <div style="margin-bottom:20px">
+        <label class="form-label">Full Name</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink-400);font-size:14px">👤</span>
+          <input type="text" id="name" class="input-field pl-11" placeholder="Your name" required/>
+        </div>
+        <p class="field-error" id="name-err" style="display:none"></p>
+      </div>
+
+      <!-- Email -->
+      <div style="margin-bottom:20px">
+        <label class="form-label">Email</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink-400);font-size:14px">✉️</span>
+          <input type="email" id="email" class="input-field pl-11" placeholder="you@example.com" required/>
+        </div>
+        <p class="field-error" id="email-err" style="display:none"></p>
+      </div>
+
+      <!-- Phone -->
+      <div style="margin-bottom:20px">
+        <label class="form-label">Phone <span style="color:var(--ink-400);font-weight:400;text-transform:none">(optional)</span></label>
+        <div style="position:relative">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink-400);font-size:14px">📱</span>
+          <input type="tel" id="phone" class="input-field pl-11" placeholder="+91 98765 43210"/>
+        </div>
+        <p class="field-error" id="phone-err" style="display:none"></p>
+      </div>
+
+      <!-- Password -->
+      <div style="margin-bottom:24px">
+        <label class="form-label">Password</label>
+        <div style="position:relative">
+          <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--ink-400);font-size:14px">🔒</span>
+          <input type="password" id="password" class="input-field pl-11 pr-11" placeholder="Min 6 characters" required oninput="updateStrength()"/>
+          <button type="button" onclick="togglePass()" id="eye-btn" style="position:absolute;right:16px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--ink-400);font-size:14px">👁</button>
+        </div>
+        <p class="field-error" id="pass-err" style="display:none"></p>
+        <!-- Strength bar -->
+        <div id="strength-wrap" style="display:none;margin-top:8px">
+          <div style="display:flex;gap:4px;align-items:center">
+            <div style="display:flex;gap:4px;flex:1">
+              <div id="s1" style="height:6px;flex:1;border-radius:999px;background:var(--ink-200);transition:background 0.3s"></div>
+              <div id="s2" style="height:6px;flex:1;border-radius:999px;background:var(--ink-200);transition:background 0.3s"></div>
+              <div id="s3" style="height:6px;flex:1;border-radius:999px;background:var(--ink-200);transition:background 0.3s"></div>
+              <div id="s4" style="height:6px;flex:1;border-radius:999px;background:var(--ink-200);transition:background 0.3s"></div>
+            </div>
+            <span id="strength-label" style="font-size:0.75rem;color:var(--ink-400);width:56px;text-align:right"></span>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" id="submit-btn" class="btn-primary" style="width:100%;justify-content:center;padding:14px;font-size:0.9375rem;border-radius:12px;margin-bottom:20px">
+        Create Account →
+      </button>
+
+      <p style="text-align:center;font-size:0.875rem;color:var(--ink-500)">
+        Already have an account? <a href="/login.html" style="color:var(--pitch-800);font-weight:600;text-decoration:none">Sign in</a>
+      </p>
+    </form>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/navbar.js"></script>
+<script src="js/navbar.html.js"></script>
+<script>
+  if (isLoggedIn()) window.location.href = '/index.html';
+  let selectedRole = 'player';
+  const urlRole = new URLSearchParams(location.search).get('role');
+  if (urlRole === 'owner') { selectedRole = 'owner'; setTimeout(() => setRole('owner'), 0); }
+
+  function setRole(r) {
+    selectedRole = r;
+    const pBtn = document.getElementById('role-player');
+    const oBtn = document.getElementById('role-owner');
+    if (r === 'player') {
+      pBtn.style.border = '2px solid var(--pitch-600)'; pBtn.style.background = 'var(--pitch-50)';
+      pBtn.querySelector('p').style.color = 'var(--pitch-900)';
+      oBtn.style.border = '2px solid var(--ink-200)'; oBtn.style.background = '#fff';
+      oBtn.querySelector('p').style.color = 'var(--ink-700)';
+    } else {
+      oBtn.style.border = '2px solid var(--pitch-600)'; oBtn.style.background = 'var(--pitch-50)';
+      oBtn.querySelector('p').style.color = 'var(--pitch-900)';
+      pBtn.style.border = '2px solid var(--ink-200)'; pBtn.style.background = '#fff';
+      pBtn.querySelector('p').style.color = 'var(--ink-700)';
+    }
+  }
+
+  let showPass = false;
+  function togglePass() {
+    showPass = !showPass;
+    document.getElementById('password').type = showPass ? 'text' : 'password';
+    document.getElementById('eye-btn').textContent = showPass ? '🙈' : '👁';
+  }
+
+  function updateStrength() {
+    const pw = document.getElementById('password').value;
+    const wrap = document.getElementById('strength-wrap');
+    if (!pw.length) { wrap.style.display = 'none'; return; }
+    wrap.style.display = 'block';
+    const len = pw.length;
+    const strength = len < 6 ? 1 : len < 10 ? 2 : len < 14 ? 3 : 4;
+    const colors = ['','#EF4444','#F59E0B','var(--pitch-400)','var(--pitch-700)'];
+    const labels = ['','Too short','Fair','Good','Strong'];
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById('s'+i).style.background = i <= strength ? colors[strength] : 'var(--ink-200)';
+    }
+    document.getElementById('strength-label').textContent = labels[strength];
+    document.getElementById('strength-label').style.color = colors[strength];
+  }
+
+  function showErr(id, msg) { const el = document.getElementById(id); el.textContent = '⚠ ' + msg; el.style.display = 'flex'; }
+  function clearErrs() { ['name-err','email-err','phone-err','pass-err'].forEach(id => document.getElementById(id).style.display = 'none'); }
+
+  document.getElementById('register-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    clearErrs();
+    const name = document.getElementById('name').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!name || name.length < 2) return showErr('name-err', 'Full name is required (min 2 chars)');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showErr('email-err', 'Enter a valid email address');
+    if (phone && !/^[+\d\s\-()]{7,15}$/.test(phone)) return showErr('phone-err', 'Enter a valid phone number');
+    if (!password || password.length < 6) return showErr('pass-err', 'Password must be at least 6 characters');
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner spinner-sm" style="border-color:rgba(255,255,255,0.3);border-top-color:#fff"></span>';
+    try {
+      const data = await api.post('/auth/register', { name, email, phone, password, role: selectedRole });
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      showToast('Welcome to PitchUp, ' + (data.user.name?.split(' ')[0] || '') + '!');
+      setTimeout(() => window.location.href = data.user.role === 'owner' ? '/owner-dashboard.html' : '/turfs.html', 800);
+    } catch (err) {
+      const msg = err.message || 'Registration failed';
+      if (msg.toLowerCase().includes('email')) showErr('email-err', msg);
+      else showToast(msg, 'error');
+      btn.disabled = false; btn.innerHTML = 'Create Account →';
+    }
+  });
+</script>
+</body>
+</html>
